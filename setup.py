@@ -7,7 +7,7 @@ setup(
     description='An MkDocs plugin to create a list of contributors on the page',
     long_description='The git-committers plugin will seed the template context with a list of github committers and other useful GIT info such as last modified date',
     keywords='mkdocs pdf github',
-    url='https://github.com/byrnereese/mkdocs-git-committers-plugin/',
+    url='https://github.com/ojacques/mkdocs-git-committers-plugin-2/',
     author='Byrne Reese, Olivier Jacques',
     author_email='byrne@majordojo.com, ojacques2@gmail.com',
     license='MIT',
@@ -32,7 +32,7 @@ setup(
     packages=find_packages(),
     entry_points={
         'mkdocs.plugins': [
-            'git-committers = mkdocs_git_committers_plugin.plugin:GitCommittersPlugin'
+            'git-committers-2 = mkdocs_git_committers_plugin_2.plugin:GitCommittersPlugin'
         ]
     }
 )
