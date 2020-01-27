@@ -32,7 +32,7 @@ setup(
     packages=find_packages(),
     entry_points={
         'mkdocs.plugins': [
-            'git-committers = mkdocs_git_committers_plugin_2.plugin:GitCommittersPlugin'
+            'git-committers-2 = mkdocs_git_committers_plugin_2.plugin:GitCommittersPlugin'
         ]
     }
 )
