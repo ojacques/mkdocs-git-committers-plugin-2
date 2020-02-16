@@ -53,11 +53,14 @@ class GitCommittersPlugin(BasePlugin):
             if res.get('data'):
                 if res['data']['search']['edges']:
                     info = res['data']['search']['edges'][0]['node']
-                    return {'login':info['login'], \
-                            'name':info['name'], \
-                            'url':info['url'], \
-                            'repos':info['url'], \
-                            'avatar':info['url']+".png?size=24" }
+                    if info:
+                        return {'login':info['login'], \
+                                'name':info['name'], \
+                                'url':info['url'], \
+                                'repos':info['url'], \
+                                'avatar':info['url']+".png?size=24" }
+                    else:
+                        return None
                 else:
                     return None
             else:
@@ -80,12 +83,14 @@ class GitCommittersPlugin(BasePlugin):
                 # Not in cache: let's ask GitHub
                 self.authors[c.author.email] = {}
                 # First, search by email
+                print("Search by email: " + c.author.email)
                 info = self.get_gituser_info( c.author.email, \
                     { 'query': '{ search(type: USER, query: "in:email ' + c.author.email + '", first: 1) { edges { node { ... on User { login name url } } } } }' })
                 if info:
                     self.authors[c.author.email] = info
                 else:
                     # If not found, search by name
+                    print("   User not found by email, search by name: " + c.author.name)
                     info = self.get_gituser_info( c.author.name, \
                         { 'query': '{ search(type: USER, query: "in:name ' + c.author.name + '", first: 1) { edges { node { ... on User { login name url } } } } }' })
                     if info:
