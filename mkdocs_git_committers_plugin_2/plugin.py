@@ -16,11 +16,11 @@ import hashlib
 class GitCommittersPlugin(BasePlugin):
 
     config_scheme = (
-        ('enterprise_hostname', config_options.Type(mkdocs_utils.string_types, default='')),
-        ('repository', config_options.Type(mkdocs_utils.string_types, default='')),
-        ('branch', config_options.Type(mkdocs_utils.string_types, default='master')),
-        ('docs_path', config_options.Type(mkdocs_utils.string_types, default='docs/')),
-        ('token', config_options.Type(mkdocs_utils.string_types, default='')),
+        ('enterprise_hostname', config_options.Type(str, default='')),
+        ('repository', config_options.Type(str, default='')),
+        ('branch', config_options.Type(str, default='master')),
+        ('docs_path', config_options.Type(str, default='docs/')),
+        ('token', config_options.Type(str, default='')),
     )
 
     def __init__(self):
