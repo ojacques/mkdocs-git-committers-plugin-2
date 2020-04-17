@@ -16,6 +16,7 @@ This "v2" differs from the original by:
 
 All of the above massively improve performances and reduce the chances to hit GitHub API rate limits.
 
+Note: the plugin configuration in `mkdocs.yml` still uses the original `git-committers` sections.
 
 ## Setup
 
@@ -45,7 +46,7 @@ Tip: You can specify the GitHub token via an environment variable in the followi
 
 ```yaml
 plugins:
-  - git-committers-2:
+  - git-committers:
       repository: johndoe/my-docs
       branch: master
       token: !!python/object/apply:os.getenv ["MKDOCS_GIT_COMMITTERS_APIKEY"]
