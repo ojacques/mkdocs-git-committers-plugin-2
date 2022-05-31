@@ -151,3 +151,17 @@ class GitCommittersPlugin(BasePlugin):
         self.total_time += (end - start)
 
         return context
+
+    def on_post_build(self, config):
+        LOG.info("git-committers: saving authors cache file")
+        json_data = json.dumps(self.authors)
+        f = open("authors.json", "w")
+        f.write(json_data)
+        f.close()
+
+    def on_pre_build(self, config):
+        if os.path.exists("authors.json"):
+            LOG.info("git-committers: loading authors cache file")
+            f = open("authors.json", "r")
+            self.authors = json.loads(f.read())
+            f.close()
