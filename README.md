@@ -28,7 +28,7 @@ Activate the plugin in `mkdocs.yml`:
 ```yaml
 plugins:
   - search
-  - git-committers-2
+  - git-committers
 ```
 
 > **Note:** If you have no `plugins` entry in your config file yet, you'll likely also want to add the `search` plugin. MkDocs enables it by default if there is no `plugins` entry set, but now you have to enable it explicitly.
@@ -94,7 +94,7 @@ random but fixed gravatar identicon is generated.
     <span class="contributors-text">Contributors</span>
     <ul class="contributors" data-bi-name="contributors">
       {%- for user in committers -%}
-      <li><a href="{{ user.repos }}" title="{{ user.name }}" data-bi-name="contributorprofile"><img src="../img/contributor.svg" data-src="{{ user.avatar }}" alt="{{ user.name }}"></a></li>
+      <li><a href="{{ user.url }}" title="{{ user.name }}" data-bi-name="contributorprofile" target="_blank"><img src="{{ user.avatar }}" alt="{{ user.name }}"></a></li>
       {%- endfor -%}
     </ul>
   </li>
