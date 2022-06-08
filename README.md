@@ -50,7 +50,7 @@ plugins:
   - git-committers:
       repository: johndoe/my-docs
       branch: master
-      token: !!python/object/apply:os.getenv ["MKDOCS_GIT_COMMITTERS_APIKEY"]
+      token: !ENV ["MKDOCS_GIT_COMMITTERS_APIKEY"]
 ```
 
 If the token is not set in `mkdocs.yml` it will be read from the `MKDOCS_GIT_COMMITTERS_APIKEY` environment variable.
