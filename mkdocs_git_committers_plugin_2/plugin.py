@@ -40,14 +40,14 @@ class GitCommittersPlugin(BasePlugin):
             self.git_enabled = True
             LOG.info("git-committers plugin ENABLED")
             self.auth_header = {'Authorization': 'token ' + self.config['token'] }
-            if self.config['enterprise_hostname'] and self.config['enterprise_hostname'] != '':
-                self.apiendpoint = "https://" + self.config['enterprise_hostname'] + "/api/graphql"
-            else:
-                self.apiendpoint = "https://api.github.com/graphql"
-            self.localrepo = Repo(".")
-            self.branch = self.config['branch']
         else:
-            LOG.warning("git-committers plugin DISABLED: no git token provided")
+            LOG.warning("no git token provided")
+        if self.config['enterprise_hostname'] and self.config['enterprise_hostname'] != '':
+            self.apiendpoint = "https://" + self.config['enterprise_hostname'] + "/api/graphql"
+        else:
+            self.apiendpoint = "https://api.github.com/graphql"
+        self.localrepo = Repo(".")
+        self.branch = self.config['branch']
         return config
 
     def get_gituser_info(self, email, query):
