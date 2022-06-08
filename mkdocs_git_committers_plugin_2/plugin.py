@@ -25,20 +25,26 @@ class GitCommittersPlugin(BasePlugin):
         ('branch', config_options.Type(str, default='master')),
         ('docs_path', config_options.Type(str, default='docs/')),
         ('token', config_options.Type(str, default='')),
+        ('enabled', config_options.Type(bool, default=True)),
     )
 
     def __init__(self):
         self.total_time = 0
         self.branch = 'master'
-        self.git_enabled = False
+        self.enabled = True
         self.authors = dict()
 
     def on_config(self, config):
-        if 'MKDOCS_GIT_COMMITTERS_APIKEY' in os.environ:
+        self.enabled = self.config['enabled']
+        if not self.enabled:
+            LOG.info("git-committers plugin DISABLED")
+            return config
+
+        LOG.info("git-committers plugin ENABLED")
+        if not self.config['token'] and 'MKDOCS_GIT_COMMITTERS_APIKEY' in os.environ:
             self.config['token'] = os.environ['MKDOCS_GIT_COMMITTERS_APIKEY']
+
         if self.config['token'] and self.config['token'] != '':
-            self.git_enabled = True
-            LOG.info("git-committers plugin ENABLED")
             self.auth_header = {'Authorization': 'token ' + self.config['token'] }
         else:
             LOG.warning("no git token provided")
@@ -51,8 +57,6 @@ class GitCommittersPlugin(BasePlugin):
         return config
 
     def get_gituser_info(self, email, query):
-        if not self.git_enabled:
-            return None
         r = requests.post(url=self.apiendpoint, json=query, headers=self.auth_header)
         res = r.json()
         if r.status_code == 200:
@@ -140,6 +144,8 @@ class GitCommittersPlugin(BasePlugin):
 
     def on_page_context(self, context, page, config, nav):
         context['committers'] = []
+        if not self.enabled:
+            return context
         start = timer()
         git_path = self.config['docs_path'] + page.file.src_path
         authors, last_commit_date = self.get_git_info(git_path)
