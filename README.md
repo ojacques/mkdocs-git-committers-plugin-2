@@ -41,6 +41,7 @@ More information about plugins in the [MkDocs documentation][mkdocs-plugins].
 * `repository` - The name of the repository, e.g. 'ojacques/mkdocs-git-committers-plugin-2'
 * `branch` - The name of the branch to pull commits from, e.g. 'master' (default)
 * `token` - A github Personal Access Token to avoid github rate limits
+* `enabled` - Disables plugin if set to `False` for e.g. local builds (default: `True`)
 
 Tip: You can specify the GitHub token via an environment variable in the following way:
 
@@ -49,7 +50,7 @@ plugins:
   - git-committers:
       repository: johndoe/my-docs
       branch: master
-      token: !!python/object/apply:os.getenv ["MKDOCS_GIT_COMMITTERS_APIKEY"]
+      token: !ENV ["MKDOCS_GIT_COMMITTERS_APIKEY"]
 ```
 
 If the token is not set in `mkdocs.yml` it will be read from the `MKDOCS_GIT_COMMITTERS_APIKEY` environment variable.
