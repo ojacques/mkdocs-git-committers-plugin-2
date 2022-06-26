@@ -26,6 +26,7 @@ class GitCommittersPlugin(BasePlugin):
         ('docs_path', config_options.Type(str, default='docs/')),
         ('token', config_options.Type(str, default='')),
         ('enabled', config_options.Type(bool, default=True)),
+        ('cache_dir', config_options.Type(str, default='.cache/plugin/git-committers')),
     )
 
     def __init__(self):
@@ -47,7 +48,7 @@ class GitCommittersPlugin(BasePlugin):
         if self.config['token'] and self.config['token'] != '':
             self.auth_header = {'Authorization': 'token ' + self.config['token'] }
         else:
-            LOG.warning("no git token provided")
+            LOG.warning("no git token provided in GH_TOKEN environment variable")
         if self.config['enterprise_hostname'] and self.config['enterprise_hostname'] != '':
             self.apiendpoint = "https://" + self.config['enterprise_hostname'] + "/api/graphql"
         else:
@@ -161,13 +162,14 @@ class GitCommittersPlugin(BasePlugin):
     def on_post_build(self, config):
         LOG.info("git-committers: saving authors cache file")
         json_data = json.dumps(self.authors)
-        f = open("authors.json", "w")
+        os.makedirs(self.config['cache_dir'], exist_ok=False)
+        f = open(self.config['cache_dir'] + "/authors.json", "w")
         f.write(json_data)
         f.close()
 
     def on_pre_build(self, config):
-        if os.path.exists("authors.json"):
+        if os.path.exists(self.config['cache_dir'] + "/authors.json"):
             LOG.info("git-committers: loading authors cache file")
-            f = open("authors.json", "r")
+            f = open(self.config['cache_dir'] + "/authors.json", "r")
             self.authors = json.loads(f.read())
             f.close()

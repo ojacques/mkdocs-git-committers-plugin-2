@@ -42,6 +42,7 @@ More information about plugins in the [MkDocs documentation][mkdocs-plugins].
 * `repository` - The name of the repository, e.g. 'ojacques/mkdocs-git-committers-plugin-2'
 * `branch` - The name of the branch to pull commits from, e.g. 'master' (default)
 * `token` - A github Personal Access Token to avoid github rate limits. The token does not need any scope: uncheck everything when creating the GitHub Token at https://github.com/settings/tokens/new
+* `cache_dir` - The path of where to store the authors cache file, used to speed up documentation builds. Defaults to `.cache/plugin/git-committers/`. The cache file will be named `authors.json` in that directory
 * `enabled` - Disables plugin if set to `False` for e.g. local builds (default: `True`)
 
 Tip: You can specify the GitHub token via an environment variable in the following way:
