@@ -67,7 +67,7 @@ class GitCommittersPlugin(BasePlugin):
                         return {'login':info['login'], \
                                 'name':info['name'], \
                                 'url':info['url'], \
-                                'avatar':info['url']+".png?size=24" }
+                                'avatar':info['url']+".png" }
                     else:
                         return None
                 else:
