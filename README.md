@@ -4,7 +4,7 @@ This is a plugin which is a fork from the original [`mkdocs-git-committers-plugi
 
 MkDocs plugin for displaying a list of committers associated with a file in mkdocs.
 
-I had to create this fork so that it could be uploaded and distributed through PyPi. The package has been renamed to ``mkdocs-git-committers-plugin-2`.
+I had to create this fork so that it could be uploaded and distributed through PyPi. The package has been renamed to `mkdocs-git-committers-plugin-2`.
 
 This "v2" differs from the original by:
 
@@ -13,6 +13,7 @@ This "v2" differs from the original by:
 * Fetch GitHub info for authors not fetched before
 * last_commit_date is now populated with local git info
 * avatar is populated with gravatar info if there is no git token
+* Save all author information in a cache file to speed up following builds
 
 All of the above massively improve performances and reduce the chances to hit GitHub API rate limits.
 
@@ -40,7 +41,7 @@ More information about plugins in the [MkDocs documentation][mkdocs-plugins].
 * `enterprise_hostname` - The enterprise hostname of your github account (Github Enterprise customers only).
 * `repository` - The name of the repository, e.g. 'ojacques/mkdocs-git-committers-plugin-2'
 * `branch` - The name of the branch to pull commits from, e.g. 'master' (default)
-* `token` - A github Personal Access Token to avoid github rate limits
+* `token` - A github Personal Access Token to avoid github rate limits. The token does not need any scope: uncheck everything when creating the GitHub Token at https://github.com/settings/tokens/new
 * `enabled` - Disables plugin if set to `False` for e.g. local builds (default: `True`)
 
 Tip: You can specify the GitHub token via an environment variable in the following way:
