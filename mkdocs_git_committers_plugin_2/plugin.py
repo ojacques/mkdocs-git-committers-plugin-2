@@ -58,6 +58,10 @@ class GitCommittersPlugin(BasePlugin):
         return config
 
     def get_gituser_info(self, email, query):
+        if not hasattr(self, 'auth_header'):
+            # No auth token provided: return now
+            return None
+        LOG.info("Get user info from GitHub for: " + email)
         r = requests.post(url=self.apiendpoint, json=query, headers=self.auth_header)
         res = r.json()
         if r.status_code == 200:
@@ -96,7 +100,6 @@ class GitCommittersPlugin(BasePlugin):
                 # Not in cache: let's ask GitHub
                 #self.authors[c.author.email] = {}
                 # First, search by email
-                LOG.info("Get user info from GitHub for: " + c.author.email)
                 info = self.get_gituser_info( c.author.email, \
                     { 'query': '{ search(type: USER, query: "in:email ' + c.author.email + '", first: 1) { edges { node { ... on User { login name url } } } } }' })
                 if info:
