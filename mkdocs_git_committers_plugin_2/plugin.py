@@ -123,7 +123,7 @@ class GitCommittersPlugin(BasePlugin):
                             author_id = c.author.name
                         else:
                             # If not found, use local git info only and gravatar avatar
-                            LOG.debug("      User not found, using local git info only");
+                            LOG.info("Get user info from local GIT info for: " + c.author.name)
                             info = { 'login':c.author.name if c.author.name else '', \
                                 'name':c.author.name if c.author.name else c.author.email, \
                                 'url':'#', \
@@ -165,7 +165,7 @@ class GitCommittersPlugin(BasePlugin):
     def on_post_build(self, config):
         LOG.info("git-committers: saving authors cache file")
         json_data = json.dumps(self.authors)
-        os.makedirs(self.config['cache_dir'], exist_ok=False)
+        os.makedirs(self.config['cache_dir'], exist_ok=True)
         f = open(self.config['cache_dir'] + "/authors.json", "w")
         f.write(json_data)
         f.close()
