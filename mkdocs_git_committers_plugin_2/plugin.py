@@ -86,7 +86,6 @@ class GitCommittersPlugin(BasePlugin):
         if not hasattr(self, 'auth_header'):
             # No auth token provided: return now
             return None
-        LOG.info("Get user info from GitHub for: " + email)
         r = requests.post(url=self.apiendpoint, json=query, headers=self.auth_header)
         res = r.json()
         if r.status_code == 200:
@@ -176,7 +175,6 @@ class GitCommittersPlugin(BasePlugin):
                 else:
                     # If not found, use local git info only and gravatar avatar
                     author_id = email
-                    LOG.info("Get user info from local GIT info for: " + c.author.name)
                     info = { 'login':name if name else '', \
                         'name':name if name else email, \
                         'url':'#', \
