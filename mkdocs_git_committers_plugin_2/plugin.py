@@ -26,6 +26,7 @@ class GitCommittersPlugin(BasePlugin):
         ('docs_path', config_options.Type(str, default='docs/')),
         ('token', config_options.Type(str, default='')),
         ('enabled', config_options.Type(bool, default=True)),
+        ('cache_dir', config_options.Type(str, default='.cache/plugin/git-committers')),
     )
 
     def __init__(self):
@@ -51,7 +52,7 @@ class GitCommittersPlugin(BasePlugin):
         if self.config['token'] and self.config['token'] != '':
             self.auth_header = {'Authorization': 'token ' + self.config['token'] }
         else:
-            LOG.warning("no git token provided")
+            LOG.warning("no git token provided in GH_TOKEN environment variable")
         if self.config['enterprise_hostname'] and self.config['enterprise_hostname'] != '':
             self.apiendpoint = "https://" + self.config['enterprise_hostname'] + "/api/graphql"
         else:
@@ -71,7 +72,7 @@ class GitCommittersPlugin(BasePlugin):
                     return {'login':info['login'], \
                             'name':info['name'], \
                             'url':info['url'], \
-                            'avatar':info['url']+".png?size=24" }
+                            'avatar':info['url']+".png" }
                 else:
                     return None
             else:
@@ -82,6 +83,10 @@ class GitCommittersPlugin(BasePlugin):
 
     
     def get_gituser_info(self, query):
+        if not hasattr(self, 'auth_header'):
+            # No auth token provided: return now
+            return None
+        LOG.info("Get user info from GitHub for: " + email)
         r = requests.post(url=self.apiendpoint, json=query, headers=self.auth_header)
         res = r.json()
         if r.status_code == 200:
@@ -92,7 +97,7 @@ class GitCommittersPlugin(BasePlugin):
                         return {'login':info['login'], \
                                 'name':info['name'], \
                                 'url':info['url'], \
-                                'avatar':info['url']+".png?size=24" }
+                                'avatar':info['url']+".png" }
                     else:
                         return None
                 else:
@@ -171,7 +176,7 @@ class GitCommittersPlugin(BasePlugin):
                 else:
                     # If not found, use local git info only and gravatar avatar
                     author_id = email
-                    LOG.info("      User not found, using local git info only");
+                    LOG.info("Get user info from local GIT info for: " + c.author.name)
                     info = { 'login':name if name else '', \
                         'name':name if name else email, \
                         'url':'#', \
@@ -204,9 +209,9 @@ class GitCommittersPlugin(BasePlugin):
         return context
 
     def on_pre_build(self, config):
-        if os.path.exists("authors.json"):
+        if os.path.exists(self.config['cache_dir'] + "/authors.json"):
             LOG.info("git-committers: loading authors cache file")
-            f = open("authors.json", "r")
+            f = open(self.config['cache_dir'] + "/authors.json", "r")
             self.authors = json.loads(f.read())
             for id, info in self.authors.items():
                 for email in info['emails']:
@@ -216,8 +221,10 @@ class GitCommittersPlugin(BasePlugin):
         for dirpath, dirnames, filenames in os.walk(self.config['docs_path']):
             for filename in [f for f in filenames if f.endswith(".md")]:
                 self.get_git_info(os.path.join(dirpath, filename), pre_run = True)
+        
         LOG.info("git-committers: saving authors cache file")
         json_data = json.dumps(self.authors)
-        f = open("authors.json", "w")
+        os.makedirs(self.config['cache_dir'], exist_ok=True)
+        f = open(self.config['cache_dir'] + "/authors.json", "w")
         f.write(json_data)
         f.close()
