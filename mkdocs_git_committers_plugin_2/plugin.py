@@ -48,7 +48,7 @@ class GitCommittersPlugin(BasePlugin):
         if self.config['token'] and self.config['token'] != '':
             self.auth_header = {'Authorization': 'token ' + self.config['token'] }
         else:
-            LOG.warning("no git token provided in GH_TOKEN environment variable")
+            LOG.warning("no git token provided and MKDOCS_GIT_COMMITTERS_APIKEY environment variable is not defined")
         if self.config['enterprise_hostname'] and self.config['enterprise_hostname'] != '':
             self.apiendpoint = "https://" + self.config['enterprise_hostname'] + "/api/graphql"
         else:
