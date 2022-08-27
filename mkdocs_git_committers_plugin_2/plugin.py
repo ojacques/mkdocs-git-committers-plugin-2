@@ -106,18 +106,18 @@ class GitCommittersPlugin(BasePlugin):
                     LOG.debug("      Found!")
                     author_id = c.author.email
                 else:
-                    # If not found, search by name
-                    LOG.debug("   User not found by email, search by name: " + c.author.name)
+                    # If not found, search by name, expecting it to be GitHub user name
+                    LOG.debug("   User not found yet, trying with GitHub username: " + c.author.name)
                     info = self.get_gituser_info( c.author.name, \
-                        { 'query': '{ search(type: USER, query: "in:name ' + c.author.name + '", first: 1) { edges { node { ... on User { login name url } } } } }' })
+                        { 'query': '{ search(type: USER, query: "in:user ' + c.author.name + '", first: 1) { edges { node { ... on User { login name url } } } } }' })
                     if info:
                         LOG.debug("      Found!")
                         author_id = c.author.name
                     else:
-                        # If not found, search by name, expecting it to be GitHub user name
-                        LOG.debug("   User not found yet, trying with GitHub username: " + c.author.name)
+                        # If not found, search by name
+                        LOG.debug("   User not found by email, search by name: " + c.author.name)
                         info = self.get_gituser_info( c.author.name, \
-                            { 'query': '{ search(type: USER, query: "in:user ' + c.author.name + '", first: 1) { edges { node { ... on User { login name url } } } } }' })
+                            { 'query': '{ search(type: USER, query: "in:name ' + c.author.name + '", first: 1) { edges { node { ... on User { login name url } } } } }' })
                         if info:
                             LOG.debug("      Found!")
                             author_id = c.author.name
