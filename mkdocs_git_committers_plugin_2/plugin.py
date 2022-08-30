@@ -61,26 +61,31 @@ class GitCommittersPlugin(BasePlugin):
         if not hasattr(self, 'auth_header'):
             # No auth token provided: return now
             return None
-        LOG.info("Get user info from GitHub for: " + email)
         r = requests.post(url=self.apiendpoint, json=query, headers=self.auth_header)
-        res = r.json()
         if r.status_code == 200:
+            res = r.json()
+            LOG.debug("   GraphQL ret code=" + str(r.status_code) + " - JSON: " + str(res))
             if res.get('data'):
                 if res['data']['search']['edges']:
-                    info = res['data']['search']['edges'][0]['node']
-                    if info:
-                        return {'login':info['login'], \
-                                'name':info['name'], \
-                                'url':info['url'], \
-                                'avatar':info['url']+".png" }
+                    if(len(res['data']['search']['edges']) == 1):
+                        info = res['data']['search']['edges'][0]['node']
+                        if info:
+                            return {'login':info['login'], \
+                                    'name':info['name'], \
+                                    'url':info['url'], \
+                                    'avatar':info['url']+".png" }
+                        else:
+                            return None
                     else:
+                        LOG.info("   Found more than one user matching on GitHub - ignoring result")
                         return None
                 else:
                     return None
             else:
-                LOG.warning("Error from GitHub GraphQL call: " + res['errors'][0]['message'])
+                LOG.warning("   Error from GitHub GraphQL call: " + res['errors'][0]['message'])
                 return None
         else:
+            LOG.warning("   Error from GitHub GraphQL call: " + res['message'])
             return None
 
     def get_git_info(self, path):
@@ -100,30 +105,31 @@ class GitCommittersPlugin(BasePlugin):
                 # Not in cache: let's ask GitHub
                 #self.authors[c.author.email] = {}
                 # First, search by email
+                LOG.info("Get user info from GitHub with user's publicly visible profile email: " + c.author.email)
                 info = self.get_gituser_info( c.author.email, \
-                    { 'query': '{ search(type: USER, query: "in:email ' + c.author.email + '", first: 1) { edges { node { ... on User { login name url } } } } }' })
+                    { 'query': '{ search(type: USER, query: "in:email ' + c.author.email + '", first: 2) { edges { node { ... on User { login name url } } } } }' })
                 if info:
-                    LOG.debug("      Found!")
+                    LOG.info("      Found " + info['login'])
                     author_id = c.author.email
                 else:
                     # If not found, search by name, expecting it to be GitHub user name
-                    LOG.debug("   User not found yet, trying with GitHub username: " + c.author.name)
+                    LOG.info("   User not found yet, trying with GitHub username used to login: " + c.author.name)
                     info = self.get_gituser_info( c.author.name, \
-                        { 'query': '{ search(type: USER, query: "in:user ' + c.author.name + '", first: 1) { edges { node { ... on User { login name url } } } } }' })
+                        { 'query': '{ search(type: USER, query: "in:login ' + c.author.name + '", first: 2) { edges { node { ... on User { login name url } } } } }' })
                     if info:
-                        LOG.debug("      Found!")
+                        LOG.info("      Found " + info['login'])
                         author_id = c.author.name
                     else:
                         # If not found, search by name
-                        LOG.debug("   User not found by email, search by name: " + c.author.name)
+                        LOG.info("   User not found yet, search by  user's public profile name: " + c.author.name)
                         info = self.get_gituser_info( c.author.name, \
-                            { 'query': '{ search(type: USER, query: "in:name ' + c.author.name + '", first: 1) { edges { node { ... on User { login name url } } } } }' })
+                            { 'query': '{ search(type: USER, query: "in:name ' + c.author.name + '", first: 2) { edges { node { ... on User { login name url } } } } }' })
                         if info:
-                            LOG.debug("      Found!")
+                            LOG.info("      Found " + info['login'])
                             author_id = c.author.name
                         else:
                             # If not found, use local git info only and gravatar avatar
-                            LOG.info("Get user info from local GIT info for: " + c.author.name)
+                            LOG.info("      Falling back to user info from local GIT for: " + c.author.name)
                             info = { 'login':c.author.name if c.author.name else '', \
                                 'name':c.author.name if c.author.name else c.author.email, \
                                 'url':'#', \
