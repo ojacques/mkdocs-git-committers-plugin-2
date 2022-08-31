@@ -11,9 +11,11 @@ from mkdocs.plugins import BasePlugin
 
 from git import Repo, Commit
 import requests, json
+from requests.exceptions import HTTPError
 import time
 import hashlib
 import re
+from bs4 import BeautifulSoup as bs
 
 LOG = logging.getLogger("mkdocs.plugins." + __name__)
 
@@ -24,9 +26,7 @@ class GitCommittersPlugin(BasePlugin):
         ('repository', config_options.Type(str, default='')),
         ('branch', config_options.Type(str, default='master')),
         ('docs_path', config_options.Type(str, default='docs/')),
-        ('token', config_options.Type(str, default='')),
         ('enabled', config_options.Type(bool, default=True)),
-        ('cache_dir', config_options.Type(str, default='.cache/plugin/git-committers')),
     )
 
     def __init__(self):
@@ -42,109 +42,52 @@ class GitCommittersPlugin(BasePlugin):
             return config
 
         LOG.info("git-committers plugin ENABLED")
-        if not self.config['token'] and 'MKDOCS_GIT_COMMITTERS_APIKEY' in os.environ:
-            self.config['token'] = os.environ['MKDOCS_GIT_COMMITTERS_APIKEY']
 
-        if self.config['token'] and self.config['token'] != '':
-            self.auth_header = {'Authorization': 'token ' + self.config['token'] }
-        else:
-            LOG.warning("no git token provided and MKDOCS_GIT_COMMITTERS_APIKEY environment variable is not defined")
+        if not self.config['repository']:
+            LOG.error("git-committers plugin: repository not specified")
+            return config
         if self.config['enterprise_hostname'] and self.config['enterprise_hostname'] != '':
-            self.apiendpoint = "https://" + self.config['enterprise_hostname'] + "/api/graphql"
+            self.githuburl = "https://" + self.config['enterprise_hostname'] + "/"
         else:
-            self.apiendpoint = "https://api.github.com/graphql"
+            self.githuburl = "https://github.com/"
         self.localrepo = Repo(".")
         self.branch = self.config['branch']
         return config
 
-    def get_gituser_info(self, email, query):
-        if not hasattr(self, 'auth_header'):
-            # No auth token provided: return now
-            return None
-        LOG.info("Get user info from GitHub for: " + email)
-        r = requests.post(url=self.apiendpoint, json=query, headers=self.auth_header)
-        res = r.json()
-        if r.status_code == 200:
-            if res.get('data'):
-                if res['data']['search']['edges']:
-                    info = res['data']['search']['edges'][0]['node']
-                    if info:
-                        return {'login':info['login'], \
-                                'name':info['name'], \
-                                'url':info['url'], \
-                                'avatar':info['url']+".png" }
-                    else:
-                        return None
-                else:
-                    return None
-            else:
-                LOG.warning("Error from GitHub GraphQL call: " + res['errors'][0]['message'])
-                return None
-        else:
-            return None
-
-    def get_git_info(self, path):
-        unique_authors = []
-        seen_authors = []
+    def list_contributors(self, path):
         last_commit_date = ""
-        LOG.debug("get_git_info for " + path)
         for c in Commit.iter_items(self.localrepo, self.localrepo.head, path):
-            author_id = ""
             if not last_commit_date:
                 # Use the last commit and get the date
                 last_commit_date = time.strftime("%Y-%m-%d", time.gmtime(c.authored_date))
-            c.author.email = c.author.email.lower()
-            # Clean up the email address
-            c.author.email = re.sub('\d*\+', '', c.author.email.replace("@users.noreply.github.com", ""))
-            if not (c.author.email in self.authors) and not (c.author.name in self.authors):
-                # Not in cache: let's ask GitHub
-                #self.authors[c.author.email] = {}
-                # First, search by email
-                info = self.get_gituser_info( c.author.email, \
-                    { 'query': '{ search(type: USER, query: "in:email ' + c.author.email + '", first: 1) { edges { node { ... on User { login name url } } } } }' })
-                if info:
-                    LOG.debug("      Found!")
-                    author_id = c.author.email
-                else:
-                    # If not found, search by name, expecting it to be GitHub user name
-                    LOG.debug("   User not found yet, trying with GitHub username: " + c.author.name)
-                    info = self.get_gituser_info( c.author.name, \
-                        { 'query': '{ search(type: USER, query: "in:user ' + c.author.name + '", first: 1) { edges { node { ... on User { login name url } } } } }' })
-                    if info:
-                        LOG.debug("      Found!")
-                        author_id = c.author.name
-                    else:
-                        # If not found, search by name
-                        LOG.debug("   User not found by email, search by name: " + c.author.name)
-                        info = self.get_gituser_info( c.author.name, \
-                            { 'query': '{ search(type: USER, query: "in:name ' + c.author.name + '", first: 1) { edges { node { ... on User { login name url } } } } }' })
-                        if info:
-                            LOG.debug("      Found!")
-                            author_id = c.author.name
-                        else:
-                            # If not found, use local git info only and gravatar avatar
-                            LOG.info("Get user info from local GIT info for: " + c.author.name)
-                            info = { 'login':c.author.name if c.author.name else '', \
-                                'name':c.author.name if c.author.name else c.author.email, \
-                                'url':'#', \
-                                'avatar':'https://www.gravatar.com/avatar/' + hashlib.md5(c.author.email.encode('utf-8')).hexdigest() + '?d=identicon' }
-                            author_id = c.author.name
-            else:
-                # Already in cache
-                if c.author.email in self.authors:
-                    info = self.authors[c.author.email]
-                    author_id = c.author.email
-                else:
-                    info = self.authors[c.author.name]
-                    author_id = c.author.name
-            if (author_id not in seen_authors):
-                LOG.debug("Adding " + author_id + " to unique authors for this page")
-                self.authors[author_id] = info
-                seen_authors.append(author_id)
-                unique_authors.append(self.authors[author_id])
 
-        LOG.debug("Contributors for page " + path + ": " + str(unique_authors))
-        return unique_authors, last_commit_date
+        url_contribs = self.githuburl + self.config['repository'] + "/contributors-list/" + self.config['branch'] + "/" + path
+        LOG.info("Fetching contributors for " + path)
+        LOG.debug("   from " + url_contribs)
+        try:
+            response = requests.get(url_contribs)
+            response.raise_for_status()
+        except HTTPError as http_err:
+            LOG.error(f'HTTP error occurred: {http_err}')
+        except Exception as err:
+            LOG.error(f'Other error occurred: {err}')
+        else:
+            html = response.text
+            # Parse the HTML
+            soup = bs(html, "lxml")
+            lis = soup.find_all('li')
+            authors=[]
+            for li in lis:
+                a_tags = li.find_all('a')
+                login = a_tags[0]['href'].replace("/", "")
+                url = self.githuburl + login
+                name = login
+                img_tags = li.find_all('img')
+                avatar = img_tags[0]['src']
+                avatar = re.sub(r'\?.*$', '', avatar)
+                authors.append({'login':login, 'name': name, 'url': url, 'avatar': avatar})
+
+        return authors, last_commit_date
 
     def on_page_context(self, context, page, config, nav):
         context['committers'] = []
@@ -152,7 +95,7 @@ class GitCommittersPlugin(BasePlugin):
             return context
         start = timer()
         git_path = self.config['docs_path'] + page.file.src_path
-        authors, last_commit_date = self.get_git_info(git_path)
+        authors, last_commit_date = self.list_contributors(git_path)
         if authors:
             context['committers'] = authors
         if last_commit_date:
@@ -161,18 +104,3 @@ class GitCommittersPlugin(BasePlugin):
         self.total_time += (end - start)
 
         return context
-
-    def on_post_build(self, config):
-        LOG.info("git-committers: saving authors cache file")
-        json_data = json.dumps(self.authors)
-        os.makedirs(self.config['cache_dir'], exist_ok=True)
-        f = open(self.config['cache_dir'] + "/authors.json", "w")
-        f.write(json_data)
-        f.close()
-
-    def on_pre_build(self, config):
-        if os.path.exists(self.config['cache_dir'] + "/authors.json"):
-            LOG.info("git-committers: loading authors cache file")
-            f = open(self.config['cache_dir'] + "/authors.json", "r")
-            self.authors = json.loads(f.read())
-            f.close()

@@ -8,14 +8,13 @@ I had to create this fork so that it could be uploaded and distributed through P
 
 This "v2" differs from the original by:
 
-* Use local git repo information to go through commits. In my test repos, I went from 200 API calls down to 10 (for a repository with 10 unique authors)
-* Fetch GitHub info only for authors
-* Fetch GitHub info for authors not fetched before
+* Fetch contributors directly from GitHub
+* Eliminate the need to match git commit logs with entries in GitHub, and thus GitHub API calls
+* No more risk of matching the incorrect contributor as the information comes directly from GitHub
 * last_commit_date is now populated with local git info
-* avatar is populated with gravatar info if there is no git token
-* Save all author information in a cache file to speed up following builds
+* No need for GitHub personal access token, as there are no more GitHub GraphQL API calls
 
-All of the above massively improve performances and reduce the chances to hit GitHub API rate limits.
+All of the above massively improves accuracy and performances.
 
 Note: the plugin configuration in `mkdocs.yml` still uses the original `git-committers` sections.
 
@@ -26,11 +25,14 @@ Install the plugin using pip:
 `pip install mkdocs-git-committers-plugin-2`
 
 Activate the plugin in `mkdocs.yml`:
+
 ```yaml
 plugins:
-  - search
-  - git-committers
+  - git-committers:
+      repository: organization/repository
+      branch: main
 ```
+
 
 > **Note:** If you have no `plugins` entry in your config file yet, you'll likely also want to add the `search` plugin. MkDocs enables it by default if there is no `plugins` entry set, but now you have to enable it explicitly.
 
@@ -38,26 +40,13 @@ More information about plugins in the [MkDocs documentation][mkdocs-plugins].
 
 ## Config
 
-* `enterprise_hostname` - The enterprise hostname of your github account (Github Enterprise customers only).
-* `repository` - The name of the repository, e.g. 'ojacques/mkdocs-git-committers-plugin-2'
-* `branch` - The name of the branch to pull commits from, e.g. 'master' (default)
-* `token` - A github Personal Access Token to avoid github rate limits. The token does not need any scope: uncheck everything when creating the GitHub Token at https://github.com/settings/tokens/new
-* `cache_dir` - The path of where to store the authors cache file, used to speed up documentation builds. Defaults to `.cache/plugin/git-committers/`. The cache file will be named `authors.json` in that directory
 * `enabled` - Disables plugin if set to `False` for e.g. local builds (default: `True`)
-
-Tip: You can specify the GitHub token via an environment variable in the following way:
-
-```yaml
-plugins:
-  - git-committers:
-      repository: johndoe/my-docs
-      branch: master
-      token: !ENV ["MKDOCS_GIT_COMMITTERS_APIKEY"]
-```
+* `repository` - The name of the repository, e.g. 'ojacques/mkdocs-git-committers-plugin-2'
+* `branch` - The name of the branch to get contributors from. Example: 'master' (default)
+* `enterprise_hostname` - For GitHub enterprise: the enterprise hostname.
+* `docs_path` - the path to the documentation folder. Defaults to `docs`.
 
 If the token is not set in `mkdocs.yml` it will be read from the `MKDOCS_GIT_COMMITTERS_APIKEY` environment variable.
-
-**If no token is present, the plugin will determine information with local git repository information only.**
 
 ## Usage
 
@@ -82,11 +71,7 @@ last updated.
 
 #### Avatar
 
-If the GitHub token is configured, a GitHub API request is made to retrieve the
-avatar from GitHub. If not, the avatar attribute is populated with gravatar
-identicon with an MD5 hash on the email address. If the author has configured
-gravatar for this email address, the avatar will show properly, otherwise a
-random but fixed gravatar identicon is generated.
+The avatar of the contributors is provided by GitHub. It uses maximal resolution.
 
 #### Template Code
 
@@ -161,3 +146,4 @@ Thank you to the following contributors:
 * Byrne Reese - original author, maintainer
 * Nathan Hernandez
 * Chris Northwood
+* Martin Donath
