@@ -64,11 +64,12 @@ class GitCommittersPlugin(BasePlugin):
         url_contribs = self.githuburl + self.config['repository'] + "/contributors-list/" + self.config['branch'] + "/" + path
         LOG.info("Fetching contributors for " + path)
         LOG.debug("   from " + url_contribs)
+        authors=[]
         try:
             response = requests.get(url_contribs)
             response.raise_for_status()
         except HTTPError as http_err:
-            LOG.error(f'HTTP error occurred: {http_err}')
+            LOG.error(f'HTTP error occurred: {http_err}\n(404 is normal if file is not on GitHub yet or Git submodule)')
         except Exception as err:
             LOG.error(f'Other error occurred: {err}')
         else:
@@ -76,7 +77,6 @@ class GitCommittersPlugin(BasePlugin):
             # Parse the HTML
             soup = bs(html, "lxml")
             lis = soup.find_all('li')
-            authors=[]
             for li in lis:
                 a_tags = li.find_all('a')
                 login = a_tags[0]['href'].replace("/", "")
