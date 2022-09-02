@@ -8,15 +8,21 @@ I had to create this fork so that it could be uploaded and distributed through P
 
 This "v2" differs from the original by:
 
-* Fetch contributors directly from GitHub
-* Eliminate the need to match git commit logs with entries in GitHub, and thus GitHub API calls
-* No more risk of matching the incorrect contributor as the information comes directly from GitHub
-* last_commit_date is now populated with local git info
-* No need for GitHub personal access token, as there are no more GitHub GraphQL API calls
+- Fetch contributors directly from GitHub
+- Eliminate the need to match git commit logs with entries in GitHub, and thus GitHub API calls
+- No more risk of matching the incorrect contributor as the information comes directly from GitHub
+- last_commit_date is now populated with local git info
+- No need for GitHub personal access token, as there are no more GitHub GraphQL API calls
 
 All of the above massively improves accuracy and performances.
 
 Note: the plugin configuration in `mkdocs.yml` still uses the original `git-committers` sections.
+
+## Limitations
+
+- Getting the contributors relies on what is available on GitHub. This means that for new files, the build will report no contributors (and informed you with a 404 error which can be ignored)  
+  When the file is merged, the contributors will be added normally.
+- For now, Git submodule is not supported and will report no contributors.
 
 ## Setup
 
@@ -33,18 +39,17 @@ plugins:
       branch: main
 ```
 
-
 > **Note:** If you have no `plugins` entry in your config file yet, you'll likely also want to add the `search` plugin. MkDocs enables it by default if there is no `plugins` entry set, but now you have to enable it explicitly.
 
 More information about plugins in the [MkDocs documentation][mkdocs-plugins].
 
 ## Config
 
-* `enabled` - Disables plugin if set to `False` for e.g. local builds (default: `True`)
-* `repository` - The name of the repository, e.g. 'ojacques/mkdocs-git-committers-plugin-2'
-* `branch` - The name of the branch to get contributors from. Example: 'master' (default)
-* `enterprise_hostname` - For GitHub enterprise: the enterprise hostname.
-* `docs_path` - the path to the documentation folder. Defaults to `docs`.
+- `enabled` - Disables plugin if set to `False` for e.g. local builds (default: `True`)
+- `repository` - The name of the repository, e.g. 'ojacques/mkdocs-git-committers-plugin-2'
+- `branch` - The name of the branch to get contributors from. Example: 'master' (default)
+- `enterprise_hostname` - For GitHub enterprise: the enterprise hostname.
+- `docs_path` - the path to the documentation folder. Defaults to `docs`.
 
 If the token is not set in `mkdocs.yml` it will be read from the `MKDOCS_GIT_COMMITTERS_APIKEY` environment variable.
 
@@ -56,7 +61,7 @@ In addition to displaying a list of committers for a file, you can also access
 the last commit date for a page if you want to display the date the file was
 last updated.
 
-#### Template Code
+#### Template Code for last commit
 
 ```django hljs
 <ul class="metadata page-metadata" data-bi-name="page info" lang="en-us" dir="ltr">
@@ -73,7 +78,7 @@ last updated.
 
 The avatar of the contributors is provided by GitHub. It uses maximal resolution.
 
-#### Template Code
+#### Template Code for avatars
 
 ```django hljs
 {% block footer %}
@@ -143,7 +148,7 @@ More information about blocks [here][mkdocs-block].
 
 Thank you to the following contributors:
 
-* Byrne Reese - original author, maintainer
-* Nathan Hernandez
-* Chris Northwood
-* Martin Donath
+- Byrne Reese - original author, maintainer
+- Nathan Hernandez
+- Chris Northwood
+- Martin Donath
