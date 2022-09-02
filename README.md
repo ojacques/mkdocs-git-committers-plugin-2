@@ -20,7 +20,7 @@ Note: the plugin configuration in `mkdocs.yml` still uses the original `git-comm
 
 ## Limitations
 
-- The contributors relies on what is available on GitHub. This means that for new files,the local build will report no contributors.
+- Getting the contributors relies on what is available on GitHub. This means that for new files, the build will report no contributors (and informed you with a 404 error which can be ignored)  
   When the file is merged, the contributors will be added normally.
 - For now, Git submodule is not supported and will report no contributors.
 
@@ -45,11 +45,11 @@ More information about plugins in the [MkDocs documentation][mkdocs-plugins].
 
 ## Config
 
-* `enabled` - Disables plugin if set to `False` for e.g. local builds (default: `True`)
-* `repository` - The name of the repository, e.g. 'ojacques/mkdocs-git-committers-plugin-2'
-* `branch` - The name of the branch to get contributors from. Example: 'master' (default)
-* `enterprise_hostname` - For GitHub enterprise: the enterprise hostname.
-* `docs_path` - the path to the documentation folder. Defaults to `docs`.
+- `enabled` - Disables plugin if set to `False` for e.g. local builds (default: `True`)
+- `repository` - The name of the repository, e.g. 'ojacques/mkdocs-git-committers-plugin-2'
+- `branch` - The name of the branch to get contributors from. Example: 'master' (default)
+- `enterprise_hostname` - For GitHub enterprise: the enterprise hostname.
+- `docs_path` - the path to the documentation folder. Defaults to `docs`.
 
 If the token is not set in `mkdocs.yml` it will be read from the `MKDOCS_GIT_COMMITTERS_APIKEY` environment variable.
 
