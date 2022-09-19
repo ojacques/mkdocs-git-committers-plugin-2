@@ -70,8 +70,9 @@ class GitCommittersPlugin(BasePlugin):
             return [], last_commit_date
 
         # Try to leverage the cache
-        if self.cache_date and time.strptime(last_commit_date, "%Y-%m-%d") < time.strptime(self.cache_date, "%Y-%m-%d"):
-            return self.cache_page_authors[path]['authors'], self.cache_page_authors[path]['last_commit_date']
+        if path in self.cache_page_authors:
+            if self.cache_date and time.strptime(last_commit_date, "%Y-%m-%d") < time.strptime(self.cache_date, "%Y-%m-%d"):
+                return self.cache_page_authors[path]['authors'], self.cache_page_authors[path]['last_commit_date']
 
         url_contribs = self.githuburl + self.config['repository'] + "/contributors-list/" + self.config['branch'] + "/" + path
         LOG.info("git-committers: fetching contributors for " + path)
