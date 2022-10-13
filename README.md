@@ -52,8 +52,6 @@ More information about plugins in the [MkDocs documentation][mkdocs-plugins].
 - `docs_path` - the path to the documentation folder. Defaults to `docs`.
 - `cache_dir` - The path which holds the authors cache file to speed up documentation builds. Defaults to `.cache/plugin/git-committers/`. The cache file is named `page-authors.json.json`.
 
-If the token is not set in `mkdocs.yml` it will be read from the `MKDOCS_GIT_COMMITTERS_APIKEY` environment variable.
-
 ## Usage
 
 ### Display Last Commit
