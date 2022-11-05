@@ -28,6 +28,7 @@ class GitCommittersPlugin(BasePlugin):
         ('docs_path', config_options.Type(str, default='docs/')),
         ('enabled', config_options.Type(bool, default=True)),
         ('cache_dir', config_options.Type(str, default='.cache/plugin/git-committers')),
+        ('token', config_options.Type(str, default='')),
     )
 
     def __init__(self):
@@ -45,6 +46,9 @@ class GitCommittersPlugin(BasePlugin):
             return config
 
         LOG.info("git-committers plugin ENABLED")
+
+        if not self.config['token'] and 'MKDOCS_GIT_COMMITTERS_TOKEN' in os.environ:
+            self.config['token'] = os.environ['MKDOCS_GIT_COMMITTERS_TOKEN']
 
         if not self.config['repository']:
             LOG.error("git-committers plugin: repository not specified")
@@ -78,8 +82,12 @@ class GitCommittersPlugin(BasePlugin):
         LOG.info("git-committers: fetching contributors for " + path)
         LOG.debug("   from " + url_contribs)
         authors=[]
+        headers = {}
+        if self.config['token'] and self.config['token'] != '':
+            headers = {'Authorization': 'token ' + self.config['token']} 
+
         try:
-            response = requests.get(url_contribs)
+            response = requests.get(url_contribs, headers=headers)
             response.raise_for_status()
         except HTTPError as http_err:
             LOG.error(f'git-committers: HTTP error occurred: {http_err}\n(404 is normal if file is not on GitHub yet or Git submodule)')
