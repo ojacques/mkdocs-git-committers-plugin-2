@@ -74,7 +74,7 @@ class GitCommittersPlugin(BasePlugin):
             if self.cache_date and time.strptime(last_commit_date, "%Y-%m-%d") < time.strptime(self.cache_date, "%Y-%m-%d"):
                 return self.cache_page_authors[path]['authors'], self.cache_page_authors[path]['last_commit_date']
 
-        url_contribs = self.githuburl + self.config['repository'] + "/contributors-list/" + self.config['branch'] + "/" + path
+        url_contribs = self.githuburl + self.config['repository'] + "/blame/" + self.config['branch'] + "/" + path
         LOG.info("git-committers: fetching contributors for " + path)
         LOG.debug("   from " + url_contribs)
         authors=[]
@@ -89,16 +89,19 @@ class GitCommittersPlugin(BasePlugin):
             html = response.text
             # Parse the HTML
             soup = bs(html, "lxml")
-            lis = soup.find_all('li')
-            for li in lis:
-                a_tags = li.find_all('a')
-                login = a_tags[0]['href'].replace("/", "")
+            a_tags = soup.select('.blame-commit a.avatar')
+            for a in a_tags:
+                login = a['href'].replace("/", "")
                 url = self.githuburl + login
                 name = login
-                img_tags = li.find_all('img')
+                img_tags = a.find_all('img')
                 avatar = img_tags[0]['src']
                 avatar = re.sub(r'\?.*$', '', avatar)
-                authors.append({'login':login, 'name': name, 'url': url, 'avatar': avatar})
+                if any(x['login'] == login for x in authors) == False:
+                    authors.append({'login':login, 'name': name, 'url': url, 'avatar': avatar})
+
+            authors.sort(key = lambda x: x['login'].lower())
+
             # Update global cache_page_authors
             self.cache_page_authors[path] = {'last_commit_date': last_commit_date, 'authors': authors}
 
