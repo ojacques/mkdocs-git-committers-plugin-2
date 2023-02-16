@@ -53,6 +53,7 @@ class GitCommittersPlugin(BasePlugin):
             self.githuburl = "https://" + self.config['enterprise_hostname'] + "/"
         else:
             self.githuburl = "https://github.com/"
+        self.github_avatar_url = 'https://avatars.githubusercontent.com/'
         self.localrepo = Repo(".")
         self.branch = self.config['branch']
         return config
@@ -77,9 +78,9 @@ class GitCommittersPlugin(BasePlugin):
         manual_authors = []
         if 'contributors' in page.meta:
             users = page.meta['contributors'].split(',')
-            for u in users:
+            for username in users:
                 c = self.get_github_user( u )
-                manual_authors.append( c )
+                manual_authors.append({'login': username, 'name': username, 'url': self.githuburl + url, 'avatar': self.github_avatar_url + username})
 
         blame_authors=[]
         url_contribs = self.githuburl + self.config['repository'] + "/blame/" + self.config['branch'] + "/" + path
@@ -115,28 +116,6 @@ class GitCommittersPlugin(BasePlugin):
         self.cache_page_authors[path] = {'last_commit_date': last_commit_date, 'authors': authors}
 
         return authors, last_commit_date
-
-    def get_github_user(self, username):
-        url_github_user = self.githuburl + username
-        try:
-            response = requests.get(url_github_user)
-            response.raise_for_status()
-        except HTTPError as http_err:
-            LOG.error(f'git-committers: HTTP error occurred: {http_err}\n(404 if manual contributor\'s github user was not found)')
-        except Exception as err:
-            LOG.error(f'git-committers: Other error occurred: {err}')
-        else:
-            html = response.text
-            # Parse the HTML
-            soup = bs(html, "lxml")
-            namespan = soup.select('span[itemprop=name]')[0]
-            contrib = {
-                "name": namespan.text,
-                "login": username,
-                "avatar": 'https://avatars.githubusercontent.com/' + username,
-                "url": self.githuburl + username
-                }
-            return contrib
 
     def on_page_context(self, context, page, config, nav):
         context['committers'] = []
