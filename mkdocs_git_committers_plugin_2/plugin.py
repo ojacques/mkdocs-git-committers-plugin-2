@@ -79,7 +79,7 @@ class GitCommittersPlugin(BasePlugin):
         if 'contributors' in page.meta:
             users = page.meta['contributors'].split(',')
             for username in users:
-                manual_authors.append({'login': username, 'name': username, 'url': self.githuburl + url, 'avatar': self.github_avatar_url + username})
+                manual_authors.append({'login': username, 'name': username, 'url': self.githuburl + username, 'avatar': self.github_avatar_url + username})
 
         blame_authors=[]
         url_contribs = self.githuburl + self.config['repository'] + "/blame/" + self.config['branch'] + "/" + path
