@@ -109,10 +109,10 @@ class GitCommittersPlugin(BasePlugin):
 
             blame_authors.sort(key = lambda x: x['login'].lower())
 
-            authors = manual_authors + blame_authors
+        authors = manual_authors + blame_authors
 
-            # Update global cache_page_authors
-            self.cache_page_authors[path] = {'last_commit_date': last_commit_date, 'authors': authors}
+        # Update global cache_page_authors
+        self.cache_page_authors[path] = {'last_commit_date': last_commit_date, 'authors': authors}
 
         return authors, last_commit_date
 
