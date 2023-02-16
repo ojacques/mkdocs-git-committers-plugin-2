@@ -79,7 +79,6 @@ class GitCommittersPlugin(BasePlugin):
         if 'contributors' in page.meta:
             users = page.meta['contributors'].split(',')
             for username in users:
-                c = self.get_github_user( u )
                 manual_authors.append({'login': username, 'name': username, 'url': self.githuburl + url, 'avatar': self.github_avatar_url + username})
 
         blame_authors=[]
