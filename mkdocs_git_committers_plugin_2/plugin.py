@@ -57,7 +57,7 @@ class GitCommittersPlugin(BasePlugin):
         self.branch = self.config['branch']
         return config
 
-    def list_contributors(self, path):
+    def list_contributors(self, path, page):
         last_commit_date = ""
         for c in Commit.iter_items(self.localrepo, self.localrepo.head, path):
             if not last_commit_date:
@@ -73,11 +73,18 @@ class GitCommittersPlugin(BasePlugin):
         if path in self.cache_page_authors:
             if self.cache_date and time.strptime(last_commit_date, "%Y-%m-%d") < time.strptime(self.cache_date, "%Y-%m-%d"):
                 return self.cache_page_authors[path]['authors'], self.cache_page_authors[path]['last_commit_date']
+        
+        manual_authors = []
+        if 'contributors' in page.meta:
+            users = page.meta['contributors'].split(',')
+            for u in users:
+                c = self.get_github_user( u )
+                manual_authors.append( c )
 
+        blame_authors=[]
         url_contribs = self.githuburl + self.config['repository'] + "/blame/" + self.config['branch'] + "/" + path
         LOG.info("git-committers: fetching contributors for " + path)
         LOG.debug("   from " + url_contribs)
-        authors=[]
         try:
             response = requests.get(url_contribs)
             response.raise_for_status()
@@ -98,14 +105,38 @@ class GitCommittersPlugin(BasePlugin):
                 avatar = img_tags[0]['src']
                 avatar = re.sub(r'\?.*$', '', avatar)
                 if any(x['login'] == login for x in authors) == False:
-                    authors.append({'login':login, 'name': name, 'url': url, 'avatar': avatar})
+                    blame_authors.append({'login':login, 'name': name, 'url': url, 'avatar': avatar})
 
-            authors.sort(key = lambda x: x['login'].lower())
+            blame_authors.sort(key = lambda x: x['login'].lower())
+
+            authors = manual_authors + blame_authors
 
             # Update global cache_page_authors
             self.cache_page_authors[path] = {'last_commit_date': last_commit_date, 'authors': authors}
 
         return authors, last_commit_date
+
+    def get_github_user(self, username):
+        url_github_user = self.githuburl + username
+        try:
+            response = requests.get(url_github_user)
+            response.raise_for_status()
+        except HTTPError as http_err:
+            LOG.error(f'git-committers: HTTP error occurred: {http_err}\n(404 if manual contributor\'s github user was not found)')
+        except Exception as err:
+            LOG.error(f'git-committers: Other error occurred: {err}')
+        else:
+            html = response.text
+            # Parse the HTML
+            soup = bs(html, "lxml")
+            namespan = soup.select('span[itemprop=name]')[0]
+            contrib = {
+                "name": namespan.text,
+                "login": username,
+                "avatar": 'https://avatars.githubusercontent.com/' + username,
+                "url": self.githuburl + username
+                }
+            return contrib
 
     def on_page_context(self, context, page, config, nav):
         context['committers'] = []
@@ -113,7 +144,7 @@ class GitCommittersPlugin(BasePlugin):
             return context
         start = timer()
         git_path = self.config['docs_path'] + page.file.src_path
-        authors, last_commit_date = self.list_contributors(git_path)
+        authors, last_commit_date = self.list_contributors(git_path, page)
         if authors:
             context['committers'] = authors
         if last_commit_date:
