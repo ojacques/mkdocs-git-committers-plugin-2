@@ -59,6 +59,7 @@ class GitCommittersPlugin(BasePlugin):
 
     def list_contributors(self, path):
         last_commit_date = ""
+        path = path.replace("\\", "/")
         for c in Commit.iter_items(self.localrepo, self.localrepo.head, path):
             if not last_commit_date:
                 # Use the last commit and get the date
