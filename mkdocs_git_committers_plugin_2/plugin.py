@@ -17,6 +17,8 @@ import hashlib
 import re
 from bs4 import BeautifulSoup as bs
 
+from mkdocs_git_committers_plugin_2.exclude import exclude
+
 LOG = logging.getLogger("mkdocs.plugins." + __name__)
 
 class GitCommittersPlugin(BasePlugin):
@@ -28,6 +30,7 @@ class GitCommittersPlugin(BasePlugin):
         ('docs_path', config_options.Type(str, default='docs/')),
         ('enabled', config_options.Type(bool, default=True)),
         ('cache_dir', config_options.Type(str, default='.cache/plugin/git-committers')),
+        ("exclude", config_options.Type(list, default=[])),
     )
 
     def __init__(self):
@@ -36,6 +39,7 @@ class GitCommittersPlugin(BasePlugin):
         self.enabled = True
         self.authors = dict()
         self.cache_page_authors = dict()
+        self.exclude = list()
         self.cache_date = ''
 
     def on_config(self, config):
@@ -55,9 +59,13 @@ class GitCommittersPlugin(BasePlugin):
             self.githuburl = "https://github.com/"
         self.localrepo = Repo(".")
         self.branch = self.config['branch']
+        self.excluded_pages = self.config['exclude']
         return config
 
     def list_contributors(self, path):
+        if exclude(path.lstrip(self.config['docs_path']), self.excluded_pages):
+            return None, None
+        
         last_commit_date = ""
         path = path.replace("\\", "/")
         for c in Commit.iter_items(self.localrepo, self.localrepo.head, path):
