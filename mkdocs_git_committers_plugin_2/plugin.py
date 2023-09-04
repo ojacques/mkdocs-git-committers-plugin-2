@@ -33,9 +33,9 @@ class GitCommittersPlugin(BasePlugin):
         self.total_time = 0
         self.branch = "master"
         self.enabled = True
-        self.authors = dict()
-        self.cache_page_authors = dict()
-        self.exclude = list()
+        self.authors = {}
+        self.cache_page_authors = {}
+        self.exclude = []
         self.cache_date = ""
 
     def on_config(self, config):
