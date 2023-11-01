@@ -1,5 +1,2 @@
-beautifulsoup4
-gitpython
-lxml>=4.9
 mkdocs>=1.0.3
 requests
