@@ -1,5 +1,4 @@
 import os
-import sys
 import logging
 from pprint import pprint
 from timeit import default_timer as timer
@@ -13,9 +12,6 @@ from git import Repo, Commit
 import requests, json
 from requests.exceptions import HTTPError
 import time
-import hashlib
-import re
-from bs4 import BeautifulSoup as bs
 
 from mkdocs_git_committers_plugin_2.exclude import exclude
 
@@ -31,6 +27,7 @@ class GitCommittersPlugin(BasePlugin):
         ('enabled', config_options.Type(bool, default=True)),
         ('cache_dir', config_options.Type(str, default='.cache/plugin/git-committers')),
         ("exclude", config_options.Type(list, default=[])),
+        ('token', config_options.Type(str, default='')),
     )
 
     def __init__(self):
@@ -49,19 +46,83 @@ class GitCommittersPlugin(BasePlugin):
             return config
 
         LOG.info("git-committers plugin ENABLED")
+        if not self.config['token'] and 'MKDOCS_GIT_COMMITTERS_APIKEY' in os.environ:
+            self.config['token'] = os.environ['MKDOCS_GIT_COMMITTERS_APIKEY']
 
+        if self.config['token'] and self.config['token'] != '':
+            self.auth_header = {'Authorization': 'token ' + self.config['token'] }
+        else:
+            LOG.warning("git-committers plugin now requires a GitHub token. Set it under 'token' mkdocs.yml config or MKDOCS_GIT_COMMITTERS_APIKEY environment variable.")
         if not self.config['repository']:
             LOG.error("git-committers plugin: repository not specified")
             return config
         if self.config['enterprise_hostname'] and self.config['enterprise_hostname'] != '':
-            self.githuburl = "https://" + self.config['enterprise_hostname'] + "/"
+            self.githuburl = "https://" + self.config['enterprise_hostname'] + "/api/graphql"
         else:
-            self.githuburl = "https://github.com/"
+            self.githuburl = "https://api.github.com/graphql"
         self.localrepo = Repo(".")
         self.branch = self.config['branch']
         self.excluded_pages = self.config['exclude']
         return config
 
+    # Get unique contributors for a given path using GitHub GraphQL API
+    def get_contributors_to_path(self, path):
+            # Query GraphQL API, and get a list of unique authors
+            query = {
+                    "query": """
+                    {
+                        repository(owner: "%s", name: "%s") {
+                            object(expression: "%s") {
+                                ... on Commit {
+                                    history(first: 100, path: "%s") {
+                                        nodes {
+                                            author {
+                                                user {
+                                                    login
+                                                    name
+                                                    url
+                                                    avatarUrl
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    """ % (self.config['repository'].split('/')[0], self.config['repository'].split('/')[1], self.branch, path)
+            }
+            authors = []
+            if not hasattr(self, 'auth_header'):
+                    # No auth token provided: return now
+                    return None
+            LOG.info("git-committers: fetching contributors for " + path)
+            LOG.debug("   from " + self.githuburl)
+            r = requests.post(url=self.githuburl, json=query, headers=self.auth_header)
+            res = r.json()
+            #print(res)
+            if r.status_code == 200:
+                    if res.get('data'):
+                            if res['data']['repository']['object']['history']['nodes']:
+                                    for node in res['data']['repository']['object']['history']['nodes']:
+                                            # If user is not None (GitHub user was deleted)
+                                            if node['author']['user']:
+                                                login = node['author']['user']['login']
+                                                if login not in [author['login'] for author in authors]:
+                                                        authors.append({'login': node['author']['user']['login'],
+                                                                        'name': node['author']['user']['name'],
+                                                                        'url': node['author']['user']['url'],
+                                                                        'avatar': node['author']['user']['avatarUrl']})
+                                    return authors
+                            else:
+                                    return []
+                    else:
+                            LOG.warning("git-committers: Error from GitHub GraphQL call: " + res['errors'][0]['message'])
+                            return []
+            else:
+                    return []
+            return []
+        
     def list_contributors(self, path):
         if exclude(path.lstrip(self.config['docs_path']), self.excluded_pages):
             return None, None
@@ -78,38 +139,15 @@ class GitCommittersPlugin(BasePlugin):
             last_commit_date = datetime.now().strftime("%Y-%m-%d")
             return [], last_commit_date
 
-        # Try to leverage the cache
+        # Use the cache if present if cache date is newer than last commit date
         if path in self.cache_page_authors:
             if self.cache_date and time.strptime(last_commit_date, "%Y-%m-%d") < time.strptime(self.cache_date, "%Y-%m-%d"):
                 return self.cache_page_authors[path]['authors'], self.cache_page_authors[path]['last_commit_date']
 
-        url_contribs = self.githuburl + self.config['repository'] + "/contributors-list/" + self.config['branch'] + "/" + path
-        LOG.info("git-committers: fetching contributors for " + path)
-        LOG.debug("   from " + url_contribs)
         authors=[]
-        try:
-            response = requests.get(url_contribs)
-            response.raise_for_status()
-        except HTTPError as http_err:
-            LOG.error(f'git-committers: HTTP error occurred: {http_err}\n(404 is normal if file is not on GitHub yet or Git submodule)')
-        except Exception as err:
-            LOG.error(f'git-committers: Other error occurred: {err}')
-        else:
-            html = response.text
-            # Parse the HTML
-            soup = bs(html, "lxml")
-            lis = soup.find_all('li')
-            for li in lis:
-                a_tags = li.find_all('a')
-                login = a_tags[0]['href'].replace("/", "")
-                url = self.githuburl + login
-                name = login
-                img_tags = li.find_all('img')
-                avatar = img_tags[0]['src']
-                avatar = re.sub(r'\?.*$', '', avatar)
-                authors.append({'login':login, 'name': name, 'url': url, 'avatar': avatar})
-            # Update global cache_page_authors
-            self.cache_page_authors[path] = {'last_commit_date': last_commit_date, 'authors': authors}
+        authors = self.get_contributors_to_path(path)
+        
+        self.cache_page_authors[path] = {'last_commit_date': last_commit_date, 'authors': authors}
 
         return authors, last_commit_date
 

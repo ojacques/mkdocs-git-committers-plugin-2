@@ -38,7 +38,7 @@ def load_requirements(requirements_files: Union[Path, list[Path]]) -> list:
 
 setup(
     name='mkdocs-git-committers-plugin-2',
-    version='1.2.0',
+    version='2.0.0',
     description='An MkDocs plugin to create a list of contributors on the page. The git-committers plugin will seed the template context with a list of github committers and other useful GIT info such as last modified date',
     long_description=README,
     long_description_content_type="text/markdown",
