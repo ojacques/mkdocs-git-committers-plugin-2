@@ -21,7 +21,8 @@ setup(
     python_requires=">=3.8,<4",
     install_requires=[
         "mkdocs>=1.0.3",
-        "requests"
+        "requests",
+        "gitpython"
     ],
     classifiers=[
         "Development Status :: 4 - Beta",
