@@ -5,38 +5,15 @@ mkdocs. The plugin uses [GitHub's GraphQL
 API](https://docs.github.com/en/graphql) to fetch the list of contributors for
 each page.
 
+For ease of use, this plugin is integrated in the [material for
+mkdocs](https://squidfunk.github.io/mkdocs-material/) theme by [Martin
+Donath](https://github.com/squidfunk). See [Mkdocs material
+documentation](https://squidfunk.github.io/mkdocs-material/setup/adding-a-git-repository/#document-contributors).
+
 Other MkDocs plugins that use information to fetch authors:
 
 - [`mkdocs-git-authors-plugin`](https://github.com/timvink/mkdocs-git-authors-plugin) for displaying user names a number of lines contributed (uses local Git information)
 - [`mkdocs-git-committers-plugin`](https://github.com/byrnereese/mkdocs-git-committers-plugin) display contributors for a page (uses local Git information, completed with REST GitHub API v3)
-
-## History
-
-This is a fork from the original [`mkdocs-git-committers-plugin`](https://github.com/byrnereese/mkdocs-git-committers-plugin) by @byrnereese.
-
-I had to create this fork so that it could be uploaded and distributed through PyPi. The package has been renamed to `mkdocs-git-committers-plugin-2`.
-
-This "v2" differs from the original by:
-
-- Fetch contributors directly from GitHub
-- Eliminate the need to match git commit logs with entries in GitHub, and thus GitHub API calls
-- No more risk of matching the incorrect contributor as the information comes directly from GitHub
-- last_commit_date is now populated with local git info
-- Use a cache file to speed up following builds: authors are fetched from GitHub for a page only if that page has changed since the last build
-
-All of the above improves accuracy and performances.
-
-Note: the plugin configuration in `mkdocs.yml` still uses the original `git-committers` sections.
-
-## material for mkdocs theme
-
-This plugin is integrated in the [material for mkdocs](https://squidfunk.github.io/mkdocs-material/) theme by [Martin Donath](https://github.com/squidfunk).
-
-## Limitations
-
-- Getting the contributors relies on what is available on GitHub. This means that for new files, the build will report no contributors (and informed you with a 404 error which can be ignored)  
-  When the file is merged, the contributors will be added normally.
-- For now, Git submodule is not supported and will report no contributors.
 
 ## Setup
 
@@ -73,7 +50,37 @@ More information about plugins in the [MkDocs documentation][mkdocs-plugins].
 - `cache_dir` - The path which holds the authors cache file to speed up documentation builds. Defaults to `.cache/plugin/git-committers/`. The cache file is named `page-authors.json.json`.
 - `exclude` - Specify a list of page source paths (one per line) that should not have author(s) or last commit date included (excluded from processing by this plugin). Default is empty. [Example Usage](https://timvink.github.io/mkdocs-git-authors-plugin/options.html#exclude).
 
+## History
+
+This is a fork from the original [`mkdocs-git-committers-plugin`](https://github.com/byrnereese/mkdocs-git-committers-plugin) by @byrnereese.
+
+I had to create this fork so that it could be uploaded and distributed through PyPi. The package has been renamed to `mkdocs-git-committers-plugin-2`.
+
+This "v2" differs from the original by:
+
+- Fetch contributors directly from GitHub
+- Eliminate the need to match git commit logs with entries in GitHub, and thus GitHub API calls
+- No more risk of matching the incorrect contributor as the information comes directly from GitHub
+- last_commit_date is now populated with local git info
+- Use a cache file to speed up following builds: authors are fetched from GitHub for a page only if that page has changed since the last build
+
+All of the above improves accuracy and performances.
+
+Note: the plugin configuration in `mkdocs.yml` still uses the original `git-committers` sections.
+
+## Limitations
+
+- Getting the contributors relies on what is available on GitHub. This means that for new files, the build will report no contributors (and informed you with a 404 error which can be ignored)  
+  When the file is merged, the contributors will be added normally.
+- For now, Git submodule is not supported and will report no contributors.
+
 ## Usage
+
+You have 2 options to use this plugin:
+
+1. Use Mkdocs material theme (see [Mkdocs material
+documentation](https://squidfunk.github.io/mkdocs-material/setup/adding-a-git-repository/#document-contributors)).
+1. Use the plugin directly in your template. See below.
 
 ### Display Last Commit
 
