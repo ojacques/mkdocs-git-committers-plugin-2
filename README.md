@@ -48,7 +48,19 @@ More information about plugins in the [MkDocs documentation][mkdocs-plugins].
 - `enterprise_hostname` - For GitHub enterprise: the enterprise hostname.
 - `docs_path` - the path to the documentation folder. Defaults to `docs`.
 - `cache_dir` - The path which holds the authors cache file to speed up documentation builds. Defaults to `.cache/plugin/git-committers/`. The cache file is named `page-authors.json.json`.
-- `exclude` - Specify a list of page source paths (one per line) that should not have author(s) or last commit date included (excluded from processing by this plugin). Default is empty. [Example Usage](https://timvink.github.io/mkdocs-git-authors-plugin/options.html#exclude).
+- `exclude` - Specify a list of page source paths (one per line) that should not have author(s) or last commit date included (excluded from processing by this plugin). Default is empty. Examples:
+
+  ```
+  # mkdocs.yml
+  plugins:
+    - git-committers:
+        exclude:
+          - README.md
+          - subfolder/page.md
+          - another_page.md
+          - all_files_inside_folder/*
+          - folder_and_subfolders/**
+  ```
 
 ## History
 
