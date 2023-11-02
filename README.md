@@ -58,7 +58,7 @@ unless you access private repositories.
 - `repository` - For GitHub, the name of the repository, e.g. 'ojacques/mkdocs-git-committers-plugin-2'
 - `gitlab_repository` - For GitLab, the project ID, e.g. '12345678'
 - `branch` - The name of the branch to get contributors from. Example: 'master' (default)
-- `token` - A github fine-grained token for GitHub GraphQL API calls (classic tokens work too). The token does not need any scope: uncheck everything when creating the GitHub Token at [github.com/settings/personal-access-tokens/new](https://github.com/settings/personal-access-tokens/new), unless you access private repositories.
+- `token` - A GitHub or GitLab personal access token for REST API calls. The token does not need any scope: uncheck everything when creating the GitHub Token at [github.com/settings/personal-access-tokens/new](https://github.com/settings/personal-access-tokens/new), unless you access private repositories. For GitLab, create a token at [gitlab.com/-/profile/personal_access_tokens](https://gitlab.com/-/profile/personal_access_tokens).
 - `enterprise_hostname` - For GitHub enterprise: the GitHub enterprise hostname.
 - `gitlab_hostname` - For GitLab: the GitLab hostname if different from gitlab.com (self-hosted).
 - `docs_path` - the path to the documentation folder. Defaults to `docs`.
