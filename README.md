@@ -1,9 +1,10 @@
 # mkdocs-git-committers-plugin-2
 
 MkDocs plugin for displaying a list of committers associated with a file in
-mkdocs. The plugin uses [GitHub's GraphQL
-API](https://docs.github.com/en/graphql) to fetch the list of contributors for
-each page.
+mkdocs. The plugin uses GitHub or GitLab API to fetch the list of contributors
+for each page.
+
+🥳 NEW! Works with GitLab too!
 
 For ease of use, this plugin is integrated in the [material for
 mkdocs](https://squidfunk.github.io/mkdocs-material/) theme by [Martin
@@ -23,37 +24,52 @@ Install the plugin using pip:
 
 Activate the plugin in `mkdocs.yml`:
 
+For a repository hosted on GitHub:
+
 ```yaml
 plugins:
   - git-committers:
       repository: organization/repository
-      branch: main
-      token: !ENV ["MKDOCS_GIT_COMMITTERS_APIKEY"]
 ```
 
-If the token is not set in `mkdocs.yml` it will be read from the `MKDOCS_GIT_COMMITTERS_APIKEY` environment variable.
+For a repository hosted on GitLab:
 
-**Change in 2.0.0: if no token is present, the plugin will NOT add provide git committers.**
+```yaml
+plugins:
+  - git-committers:
+      gitlab_repository: 12345678
+      token: !ENV ["GH_TOKEN"]
+```
 
-> **Note:** If you have no `plugins` entry in your config file yet, you'll likely also want to add the `search` plugin. MkDocs enables it by default if there is no `plugins` entry set, but now you have to enable it explicitly.
+For a repository hosted on GitLab, you need to provide a token so that the
+plugin can access the GitLab API. If the token is not set in `mkdocs.yml` it
+will be read from the `MKDOCS_GIT_COMMITTERS_APIKEY` environment variable.
 
-More information about plugins in the [MkDocs documentation][mkdocs-plugins].
+For a repository hosted on GitHub, you can provide a token to increase the rate
+limit and go beyond the default 60 requests per hour per IP address. The plugin
+will make one request per mkdocs document. The token does not need any scope:
+uncheck everything when creating the GitHub Token at
+[github.com/settings/personal-access-tokens/new](https://github.com/settings/personal-access-tokens/new),
+unless you access private repositories.
 
 ## Config
 
 - `enabled` - Disables plugin if set to `False` for e.g. local builds (default: `True`)
-- `repository` - The name of the repository, e.g. 'ojacques/mkdocs-git-committers-plugin-2'
+- `repository` - For GitHub, the name of the repository, e.g. 'ojacques/mkdocs-git-committers-plugin-2'
+- `gitlab_repository` - For GitLab, the project ID, e.g. '12345678'
 - `branch` - The name of the branch to get contributors from. Example: 'master' (default)
 - `token` - A github fine-grained token for GitHub GraphQL API calls (classic tokens work too). The token does not need any scope: uncheck everything when creating the GitHub Token at [github.com/settings/personal-access-tokens/new](https://github.com/settings/personal-access-tokens/new), unless you access private repositories.
-- `enterprise_hostname` - For GitHub enterprise: the enterprise hostname.
+- `enterprise_hostname` - For GitHub enterprise: the GitHub enterprise hostname.
+- `gitlab_hostname` - For GitLab: the GitLab hostname if different from gitlab.com (self-hosted).
 - `docs_path` - the path to the documentation folder. Defaults to `docs`.
-- `cache_dir` - The path which holds the authors cache file to speed up documentation builds. Defaults to `.cache/plugin/git-committers/`. The cache file is named `page-authors.json.json`.
+- `cache_dir` - The path which holds the authors cache file to speed up documentation builds. Defaults to `.cache/plugin/git-committers/`. The cache file is named `page-authors.json`.
 - `exclude` - Specify a list of page source paths (one per line) that should not have author(s) or last commit date included (excluded from processing by this plugin). Default is empty. Examples:
 
   ```
   # mkdocs.yml
   plugins:
     - git-committers:
+        repository: organization/repository
         exclude:
           - README.md
           - subfolder/page.md
