@@ -106,8 +106,8 @@ class GitCommittersPlugin(BasePlugin):
                             authors.append({'login': commit['author']['login'],
                                             'name': commit['author']['login'],
                                             'url': commit['author']['html_url'],
-                                            'avatar': commit['author']['avatar_url'],
-                                            'source': 'github'})
+                                            'avatar': commit['author']['avatar_url']
+                                            })
                     else:
                         # GitLab
                         if commit['author_name']:
@@ -118,8 +118,8 @@ class GitCommittersPlugin(BasePlugin):
                                     authors.append({'login': self.gitlabauthors_cache[commit['author_name']]['username'],
                                                     'name': commit['author_name'],
                                                     'url': self.gitlabauthors_cache[commit['author_name']]['web_url'],
-                                                    'avatar': self.gitlabauthors_cache[commit['author_name']]['avatar_url'],
-                                                    'source': 'gitlab'})
+                                                    'avatar': self.gitlabauthors_cache[commit['author_name']]['avatar_url']
+                                                    })
                                 else:
                                     # Fetch author from GitLab API
                                     url = self.gitlaburl + "/users?search=" + requests.utils.quote(commit['author_name'])
@@ -135,8 +135,8 @@ class GitCommittersPlugin(BasePlugin):
                                                     authors.append({'login': user['username'],
                                                                     'name': user['name'],
                                                                     'url': user['web_url'],
-                                                                    'avatar': user['avatar_url'],
-                                                                    'source': 'gitlab'})
+                                                                    'avatar': user['avatar_url']
+                                                                    })
                                                     break
                                     else:
                                         LOG.error("git-committers:   " + str(r.status_code) + " " + r.reason)
@@ -192,6 +192,10 @@ class GitCommittersPlugin(BasePlugin):
             context['committers'] = authors
         if last_commit_date:
             context['last_commit_date'] = last_commit_date
+        if not self.config['gitlab_repository']:
+            context['committers-source'] = 'github'
+        else:
+            context['committers-source'] = 'gitlab'
         end = timer()
         self.total_time += (end - start)
 
