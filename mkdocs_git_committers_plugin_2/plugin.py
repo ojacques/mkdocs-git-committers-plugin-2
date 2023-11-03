@@ -43,7 +43,7 @@ class GitCommittersPlugin(BasePlugin):
         self.last_request_return_code = 0
         self.githuburl = "https://api.github.com"
         self.gitlaburl = "https://gitlab.com/api/v4"
-        self.gitlabauthors = dict()
+        self.gitlabauthors_cache = dict()
 
     def on_config(self, config):
         self.enabled = self.config['enabled']
@@ -106,18 +106,20 @@ class GitCommittersPlugin(BasePlugin):
                             authors.append({'login': commit['author']['login'],
                                             'name': commit['author']['login'],
                                             'url': commit['author']['html_url'],
-                                            'avatar': commit['author']['avatar_url']})
+                                            'avatar': commit['author']['avatar_url'],
+                                            'source': 'github'})
                     else:
                         # GitLab
                         if commit['author_name']:
                             # If author is not already in the list of authors
                             if commit['author_name'] not in [author['name'] for author in authors]:
                                 # Look for GitLab author in our cache self.gitlabauthors. If not found fetch it from GitLab API and save it in cache.
-                                if commit['author_name'] in self.gitlabauthors:
-                                    authors.append({'login': self.gitlabauthors[commit['author_name']]['username'],
+                                if commit['author_name'] in self.gitlabauthors_cache:
+                                    authors.append({'login': self.gitlabauthors_cache[commit['author_name']]['username'],
                                                     'name': commit['author_name'],
-                                                    'url': self.gitlabauthors[commit['author_name']]['web_url'],
-                                                    'avatar': self.gitlabauthors[commit['author_name']]['avatar_url']})
+                                                    'url': self.gitlabauthors_cache[commit['author_name']]['web_url'],
+                                                    'avatar': self.gitlabauthors_cache[commit['author_name']]['avatar_url'],
+                                                    'source': 'gitlab'})
                                 else:
                                     # Fetch author from GitLab API
                                     url = self.gitlaburl + "/users?search=" + requests.utils.quote(commit['author_name'])
@@ -129,11 +131,12 @@ class GitCommittersPlugin(BasePlugin):
                                             for user in res:
                                                 if user['name'] == commit['author_name']:
                                                     # Save it in cache
-                                                    self.gitlabauthors[commit['author_name']] = user
+                                                    self.gitlabauthors_cache[commit['author_name']] = user
                                                     authors.append({'login': user['username'],
                                                                     'name': user['name'],
                                                                     'url': user['web_url'],
-                                                                    'avatar': user['avatar_url']})
+                                                                    'avatar': user['avatar_url'],
+                                                                    'source': 'gitlab'})
                                                     break
                                     else:
                                         LOG.error("git-committers:   " + str(r.status_code) + " " + r.reason)
