@@ -151,10 +151,6 @@ class GitCommittersPlugin(BasePlugin):
             return []
         
     def list_contributors(self, path):
-        if exclude(path.lstrip(self.config['docs_path']), self.excluded_pages):
-            LOG.warning("git-committers: " + path + " is excluded")
-            return None, None
-        
         last_commit_date = ""
         path = path.replace("\\", "/")
         for c in Commit.iter_items(self.localrepo, self.localrepo.head, path):
@@ -182,6 +178,10 @@ class GitCommittersPlugin(BasePlugin):
         return authors, last_commit_date
 
     def on_page_context(self, context, page, config, nav):
+        if exclude(page.file.src_path, self.excluded_pages):
+            LOG.warning("git-committers: " + page.file.src_path + " is excluded")
+            return context
+
         context['committers'] = []
         if not self.enabled:
             return context
