@@ -75,7 +75,7 @@ class GitCommittersPlugin(BasePlugin):
             if self.config['gitlab_repository']:
                 LOG.error("git-committers plugin: GitLab API requires a token. Set it under 'token' mkdocs.yml config or MKDOCS_GIT_COMMITTERS_APIKEY environment variable.")
             else:
-                LOG.warning("git-committers plugin may require a GitHub or GitLab token if you exceed the API rate limit or for private repositories. Set it under 'token' mkdocs.yml config or MKDOCS_GIT_COMMITTERS_APIKEY environment variable.")
+                LOG.warning("git-committers plugin may require a GitHub token if you exceed the API rate limit or for private repositories. Set it under 'token' mkdocs.yml config or MKDOCS_GIT_COMMITTERS_APIKEY environment variable.")
         self.localrepo = Repo(".")
         self.branch = self.config['branch']
         self.excluded_pages = self.config['exclude']
@@ -193,9 +193,9 @@ class GitCommittersPlugin(BasePlugin):
         if last_commit_date:
             context['last_commit_date'] = last_commit_date
         if not self.config['gitlab_repository']:
-            context['committers-source'] = 'github'
+            context['committers_source'] = 'github'
         else:
-            context['committers-source'] = 'gitlab'
+            context['committers_source'] = 'gitlab'
         end = timer()
         self.total_time += (end - start)
 
