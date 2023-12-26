@@ -30,6 +30,8 @@ class GitCommittersPlugin(BasePlugin):
         ('cache_dir', config_options.Type(str, default='.cache/plugin/git-committers')),
         ("exclude", config_options.Type(list, default=[])),
         ('token', config_options.Type(str, default='')),
+        ('repo_location', config_options.Type(str, default='.')),
+        ('search_parent_directories', config_options.Type(bool, default=False)),
     )
 
     def __init__(self):
@@ -76,7 +78,7 @@ class GitCommittersPlugin(BasePlugin):
                 LOG.error("git-committers plugin: GitLab API requires a token. Set it under 'token' mkdocs.yml config or MKDOCS_GIT_COMMITTERS_APIKEY environment variable.")
             else:
                 LOG.warning("git-committers plugin may require a GitHub token if you exceed the API rate limit or for private repositories. Set it under 'token' mkdocs.yml config or MKDOCS_GIT_COMMITTERS_APIKEY environment variable.")
-        self.localrepo = Repo(".")
+        self.localrepo = Repo(search_parent_directories = self.config['search_parent_directories'], path = self.config['repo_location'])
         self.branch = self.config['branch']
         self.excluded_pages = self.config['exclude']
         return config

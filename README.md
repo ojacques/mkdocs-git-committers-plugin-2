@@ -64,6 +64,8 @@ unless you access private repositories.
 - `docs_path` - the path to the documentation folder. Defaults to `docs`.
 - `cache_dir` - The path which holds the authors cache file to speed up documentation builds. Defaults to `.cache/plugin/git-committers/`. The cache file is named `page-authors.json`.
 - `exclude` - Specify a list of page source paths (one per line) that should not have author(s) or last commit date included (excluded from processing by this plugin). Default is empty. Examples:
+- `repo_location` - Specify `..` if '.git' directory is parent to current (default: `.`)
+- `search_parent_directories` - Search repo in every parent directory (default: `False`)
 
   ```
   # mkdocs.yml
