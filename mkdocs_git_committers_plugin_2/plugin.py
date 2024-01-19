@@ -59,7 +59,7 @@ class GitCommittersPlugin(BasePlugin):
             LOG.error("git-committers plugin: repository not specified")
             return config
         if self.config['enterprise_hostname'] and self.config['enterprise_hostname'] != '':
-            self.githuburl = "https://" + self.config['enterprise_hostname'] + "/api"
+            self.githuburl = "https://" + self.config['enterprise_hostname'] + "/api" + self.config['api_version']
         if self.config['gitlab_hostname'] and self.config['gitlab_hostname'] != '':
             self.gitlaburl = "https://" + self.config['gitlab_hostname'] + "/api/v4"
             # gitlab_repository must be set
