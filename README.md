@@ -61,6 +61,7 @@ unless you access private repositories.
 - `token` - A GitHub or GitLab personal access token for REST API calls. The token does not need any scope: uncheck everything when creating the GitHub Token at [github.com/settings/personal-access-tokens/new](https://github.com/settings/personal-access-tokens/new), unless you access private repositories. For GitLab, create a token at [gitlab.com/-/profile/personal_access_tokens](https://gitlab.com/-/profile/personal_access_tokens).
 - `enterprise_hostname` - For GitHub enterprise: the GitHub enterprise hostname.
 - `gitlab_hostname` - For GitLab: the GitLab hostname if different from gitlab.com (self-hosted).
+- `api_version` - For GithHub Enterprise: The version part that needs to be appended to the URL. E.g. `/v3`
 - `docs_path` - the path to the documentation folder. Defaults to `docs`.
 - `cache_dir` - The path which holds the authors cache file to speed up documentation builds. Defaults to `.cache/plugin/git-committers/`. The cache file is named `page-authors.json`.
 - `exclude` - Specify a list of page source paths (one per line) that should not have author(s) or last commit date included (excluded from processing by this plugin). Default is empty. Examples:
