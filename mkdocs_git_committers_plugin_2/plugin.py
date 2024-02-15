@@ -182,7 +182,7 @@ class GitCommittersPlugin(BasePlugin):
         if not self.enabled:
             return context
         if exclude(page.file.src_path, self.excluded_pages):
-            LOG.warning("git-committers: " + page.file.src_path + " is excluded")
+            LOG.info("git-committers: " + page.file.src_path + " is excluded")
             return context
         start = timer()
         git_path = self.config['docs_path'] + page.file.src_path
