@@ -55,15 +55,27 @@ unless you access private repositories.
 ## Config
 
 - `enabled` - Disables plugin if set to `False` for e.g. local builds (default: `True`)
-- `repository` - For GitHub, the name of the repository, e.g. 'ojacques/mkdocs-git-committers-plugin-2'
+- `repository` - For GitHub, the name of the repository, e.g.
+  'ojacques/mkdocs-git-committers-plugin-2'
 - `gitlab_repository` - For GitLab, the project ID, e.g. '12345678'
-- `branch` - The name of the branch to get contributors from. Example: 'master' (default)
-- `token` - A GitHub or GitLab personal access token for REST API calls. The token does not need any scope: uncheck everything when creating the GitHub Token at [github.com/settings/personal-access-tokens/new](https://github.com/settings/personal-access-tokens/new), unless you access private repositories. For GitLab, create a token at [gitlab.com/-/profile/personal_access_tokens](https://gitlab.com/-/profile/personal_access_tokens).
+- `branch` - The name of the branch to get contributors from. Example: 'master'
+  (default)
+- `token` - A GitHub or GitLab personal access token for REST API calls. The
+  token does not need any scope: uncheck everything when creating the GitHub
+  Token at
+  [github.com/settings/personal-access-tokens/new](https://github.com/settings/personal-access-tokens/new),
+  unless you access private repositories. For GitLab, create a token at
+  [gitlab.com/-/profile/personal_access_tokens](https://gitlab.com/-/profile/personal_access_tokens).
 - `enterprise_hostname` - For GitHub enterprise: the GitHub enterprise hostname.
-- `gitlab_hostname` - For GitLab: the GitLab hostname if different from gitlab.com (self-hosted).
+- `gitlab_hostname` - For GitLab: the GitLab hostname if different from
+  gitlab.com (self-hosted).
 - `docs_path` - the path to the documentation folder. Defaults to `docs`.
-- `cache_dir` - The path which holds the authors cache file to speed up documentation builds. Defaults to `.cache/plugin/git-committers/`. The cache file is named `page-authors.json`.
-- `exclude` - Specify a list of page source paths (one per line) that should not have author(s) or last commit date included (excluded from processing by this plugin). Default is empty. Examples:
+- `cache_dir` - The path which holds the authors cache file to speed up
+  documentation builds. Defaults to `.cache/plugin/git-committers/`. The cache
+  file is named `page-authors.json`.
+- `exclude` - Specify a list of page source paths (one per line) that should not
+  have author(s) or last commit date included (excluded from processing by this
+  plugin). Default is empty. Examples:
 
   ```
   # mkdocs.yml
@@ -98,8 +110,7 @@ Note: the plugin configuration in `mkdocs.yml` still uses the original `git-comm
 
 ## Limitations
 
-- Getting the contributors relies on what is available on GitHub. This means that for new files, the build will report no contributors (and informed you with a 404 error which can be ignored)  
-  When the file is merged, the contributors will be added normally.
+- Getting the contributors relies on what is available on GitHub or GitLab.
 - For now, Git submodule is not supported and will report no contributors.
 
 ## Usage
@@ -207,3 +218,10 @@ Thank you to the following contributors:
 - Nathan Hernandez
 - Chris Northwood
 - Martin Donath
+- PTKay
+- Guts
+- Fir121
+- dstockhammer
+- thor
+- n2N8Z
+- barreeeiroo
