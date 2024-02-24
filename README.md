@@ -60,12 +60,18 @@ unless you access private repositories.
 - `gitlab_repository` - For GitLab, the project ID, e.g. '12345678'
 - `branch` - The name of the branch to get contributors from. Example: 'master'
   (default)
-- `token` - A GitHub or GitLab personal access token for REST API calls. The
-  token does not need any scope: uncheck everything when creating the GitHub
-  Token at
-  [github.com/settings/personal-access-tokens/new](https://github.com/settings/personal-access-tokens/new),
-  unless you access private repositories. For GitLab, create a token at
-  [gitlab.com/-/profile/personal_access_tokens](https://gitlab.com/-/profile/personal_access_tokens).
+- `token` - A GitHub or GitLab personal access token for REST API calls. 
+  - For GitHub, token does not need any scope: uncheck everything when creating
+    the GitHub Token at
+    [github.com/settings/personal-access-tokens/new](https://github.com/settings/personal-access-tokens/new),
+    unless you access private repositories.
+  - For GitLab, a
+    [project access token](https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html)
+    scoped to `read_api` is expected to work. That way, the token is limited to
+    the project and has access to read the repository. You could use a personal
+    access token at
+    [gitlab.com/-/profile/personal_access_tokens](https://gitlab.com/-/profile/personal_access_tokens),
+    but it will grant access to more repositories than you want.
 - `enterprise_hostname` - For GitHub enterprise: the GitHub enterprise hostname.
 - `gitlab_hostname` - For GitLab: the GitLab hostname if different from 
   gitlab.com (self-hosted).
@@ -114,6 +120,7 @@ Note: the plugin configuration in `mkdocs.yml` still uses the original `git-comm
 
 - Getting the contributors relies on what is available on GitHub or GitLab.
 - For now, Git submodule is not supported and will report no contributors.
+- GitLab users may not be properly identified. See [issue #50](https://github.com/ojacques/mkdocs-git-committers-plugin-2/issues/50)
 
 ## Usage
 
