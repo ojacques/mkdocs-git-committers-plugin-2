@@ -69,7 +69,8 @@ unless you access private repositories.
 - `enterprise_hostname` - For GitHub enterprise: the GitHub enterprise hostname.
 - `gitlab_hostname` - For GitLab: the GitLab hostname if different from 
   gitlab.com (self-hosted).
-- `api_version` - For GitHub Enterprise: The version part that needs to be appended to the URL. E.g. `/v3`
+- `api_version` - For GitHub and GitLab self-hosted, the API version part that needs to be appended to the URL. 
+  Defaults to v4 for GitLab, and nothing for GitHub Enterprise (you may need `v3`).
 - `docs_path` - the path to the documentation folder. Defaults to `docs`.
 - `cache_dir` - The path which holds the authors cache file to speed up
   documentation builds. Defaults to `.cache/plugin/git-committers/`. The cache
