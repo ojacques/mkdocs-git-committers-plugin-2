@@ -24,6 +24,7 @@ class GitCommittersPlugin(BasePlugin):
         ('gitlab_hostname', config_options.Type(str, default='')),
         ('repository', config_options.Type(str, default='')),           # For GitHub: owner/repo
         ('gitlab_repository', config_options.Type(int, default=0)),     # For GitLab: project_id
+        ('api_version', config_options.Type(str, default=None)),
         ('branch', config_options.Type(str, default='master')),
         ('docs_path', config_options.Type(str, default='docs/')),
         ('enabled', config_options.Type(bool, default=True)),
