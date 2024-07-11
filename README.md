@@ -52,6 +52,8 @@ uncheck everything when creating the GitHub Token at
 [github.com/settings/personal-access-tokens/new](https://github.com/settings/personal-access-tokens/new),
 unless you access private repositories.
 
+For private GitHub repositories, you only need to allow read-only access to `Contents` and `Metadata` on the target repository. This could be done by setting `Read-only` access of `Permissions > Repository permissions > Contents`.
+
 ## Config
 
 - `enabled` - Disables plugin if set to `False` for e.g. local builds (default: `True`)
