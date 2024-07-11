@@ -115,6 +115,12 @@ class GitCommittersPlugin(BasePlugin):
                                             'url': commit['author']['html_url'],
                                             'avatar': commit['author']['avatar_url']
                                             })
+                        if commit['committer'] and commit['committer']['login'] and commit['committer']['login'] not in [author['login'] for author in authors]:
+                            authors.append({'login': commit['committer']['login'],
+                                            'name': commit['committer']['login'],
+                                            'url': commit['committer']['html_url'],
+                                            'avatar': commit['committer']['avatar_url']
+                                            })
                     else:
                         # GitLab
                         if commit['author_name']:
