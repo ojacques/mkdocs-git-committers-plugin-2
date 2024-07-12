@@ -54,6 +54,11 @@ unless you access private repositories.
 
 For private GitHub repositories, you only need to allow read-only access to `Contents` and `Metadata` on the target repository. This could be done by setting `Read-only` access of `Permissions > Repository permissions > Contents`.
 
+## Counting Contributors
+
+* In GitHub repositories, the commit authors, [committers](https://stackoverflow.com/a/18754896), and [co-authors](https://docs.github.com/en/pull-requests/committing-changes-to-your-project/creating-and-editing-commits/creating-a-commit-with-multiple-authors) are counted as contributors. However, the plugin requires a GitHub token to fetch the list of co-authors. If co-authors exist but no token is provided, the plugin will show a warning and will only display the commit authors and committers.
+* In GitLab repositories, only the commit authors are counted as contributors.
+
 ## Config
 
 - `enabled` - Disables plugin if set to `False` for e.g. local builds (default: `True`)

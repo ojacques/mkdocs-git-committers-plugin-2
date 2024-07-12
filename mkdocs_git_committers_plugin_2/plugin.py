@@ -106,6 +106,7 @@ class GitCommittersPlugin(BasePlugin):
             if r.status_code == 200:
                 # Get login, url and avatar for each author. Ensure no duplicates.
                 res = r.json()
+                github_coauthors_exist = False
                 for commit in res:
                     if not self.config['gitlab_repository']:
                         # GitHub
@@ -121,6 +122,8 @@ class GitCommittersPlugin(BasePlugin):
                                             'url': commit['committer']['html_url'],
                                             'avatar': commit['committer']['avatar_url']
                                             })
+                        if commit['commit'] and commit['commit']['message'] and '\nCo-authored-by:' in commit['commit']['message']:
+                            github_coauthors_exist = True
                     else:
                         # GitLab
                         if commit['author_name']:
@@ -153,6 +156,59 @@ class GitCommittersPlugin(BasePlugin):
                                                     break
                                     else:
                                         LOG.error("git-committers:   " + str(r.status_code) + " " + r.reason)
+                if github_coauthors_exist:
+                    github_coauthors_count = 0
+                    # Get co-authors info through the GraphQL API, which is not available in the REST API
+                    if self.auth_header is None:
+                        LOG.warning("git-committers: Co-authors exist in commit messages but will not be added, since no GitHub token is provided. Set it under 'token' mkdocs.yml config or MKDOCS_GIT_COMMITTERS_APIKEY environment variable.")
+                    else:
+                        LOG.info("git-committers: fetching contributors for " + path + " using GraphQL API")
+                        # Query GraphQL API, and get a list of unique authors
+                        url = self.githuburl + "/graphql"
+                        query = {
+                                "query": """
+                                {
+                                  repository(owner: "%s", name: "%s") {
+                                    object(expression: "%s") {
+                                      ... on Commit {
+                                        history(first: 100, path: "%s") {
+                                          nodes {
+                                            authors(first: 100) {
+                                              nodes {
+                                                user {
+                                                  login
+                                                  name
+                                                  url
+                                                  avatarUrl
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                                """ % (self.config['repository'].split('/')[0], self.config['repository'].split('/')[1], self.branch, path)
+                        }
+                        r = requests.post(url=url, json=query, headers=self.auth_header)
+                        res = r.json()
+                        if r.status_code == 200:
+                            if res.get('data'):
+                                if res['data']['repository']['object']['history']['nodes']:
+                                    for history_node in res['data']['repository']['object']['history']['nodes']:
+                                        for author_node in history_node['authors']['nodes']:
+                                            # If user is not None (GitHub user was deleted)
+                                            if author_node['user']:
+                                                if author_node['user']['login'] not in [author['login'] for author in authors]:
+                                                    authors.append({'login': author_node['user']['login'],
+                                                                    'name': author_node['user']['name'],
+                                                                    'url': author_node['user']['url'],
+                                                                    'avatar': author_node['user']['avatarUrl']})
+                                                    github_coauthors_count += 1
+                            else:
+                                LOG.warning("git-committers: Error from GitHub GraphQL call: " + res['errors'][0]['message'])
+                    LOG.info(f"git-committers: added {github_coauthors_count} co-authors")
                 return authors
             else:
                 LOG.error("git-committers: error fetching contributors for " + path)
