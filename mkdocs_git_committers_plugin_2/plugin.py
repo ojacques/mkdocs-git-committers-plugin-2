@@ -12,6 +12,7 @@ from git import Repo, Commit
 import requests, json
 from requests.exceptions import HTTPError
 import time
+import re
 
 from mkdocs_git_committers_plugin_2.exclude import exclude
 
@@ -89,7 +90,7 @@ class GitCommittersPlugin(BasePlugin):
         return config
 
     # Get unique contributors for a given path
-    def get_contributors_to_file(self, path):
+    def get_contributors_to_file(self, path, submodule_repo=None):
             # We already got a 401 (unauthorized) or 403 (rate limit) error, so we don't try again
             if self.last_request_return_code == 403 or self.last_request_return_code == 401:
                 return []
@@ -97,8 +98,10 @@ class GitCommittersPlugin(BasePlugin):
                 # REST endpoint is in the form https://gitlab.com/api/v4/projects/[project ID]/repository/commits?path=[uri-encoded-path]&ref_name=[branch]
                 url = self.gitlaburl + "/projects/" + str(self.config['gitlab_repository']) + "/repository/commits?path=" +  requests.utils.quote(path) + "&ref_name=" + self.branch
             else:
+                # Check git submodule
+                repository = submodule_repo or self.config['repository']
                 # REST endpoint is in the form https://api.github.com/repos/[repository]/commits?path=[uri-encoded-path]&sha=[branch]&per_page=100
-                url = self.githuburl + "/repos/" + self.config['repository'] + "/commits?path=" +  requests.utils.quote(path) + "&sha=" + self.branch + "&per_page=100"
+                url = self.githuburl + "/repos/" + repository + "/commits?path=" +  requests.utils.quote(path) + "&sha=" + self.branch + "&per_page=100"
             authors = []
             LOG.info("git-committers: fetching contributors for " + path)
             r = requests.get(url=url, headers=self.auth_header)
@@ -171,6 +174,25 @@ class GitCommittersPlugin(BasePlugin):
                 # Use the last commit and get the date
                 last_commit_date = time.strftime("%Y-%m-%d", time.gmtime(c.authored_date))
 
+        # Check if the file is in a git submodule on GitHub
+        submodule_repo, path_in_submodule = None, None
+        if last_commit_date == "" and not self.config['gitlab_repository']:
+            for submodule in self.localrepo.submodules:
+                if submodule_repo:
+                    break
+                if not path.startswith(submodule.path):
+                    continue
+                match = re.match(r"https:\/\/github\.com\/([^\/]+\/[^\/.]+)", submodule.url)
+                if not match:
+                    LOG.warning("git-committers: Submodule matched but will not be queried, since it isn't a GitHub repo.")
+                    continue
+                path_in_submodule = path[len(submodule.path)+1:]
+                for c in Commit.iter_items(submodule.module(), submodule.module().head, path_in_submodule):
+                    if not last_commit_date:
+                        # Use the last commit and get the date
+                        submodule_repo = match.group(1)
+                        last_commit_date = time.strftime("%Y-%m-%d", time.gmtime(c.authored_date))
+
         # File not committed yet
         if last_commit_date == "":
             last_commit_date = datetime.now().strftime("%Y-%m-%d")
@@ -184,7 +206,11 @@ class GitCommittersPlugin(BasePlugin):
                     return self.cache_page_authors[path]['authors'], self.cache_page_authors[path]['last_commit_date']
 
         authors=[]
-        authors = self.get_contributors_to_file(path)
+        if not submodule_repo:
+            authors = self.get_contributors_to_file(path)
+        else:
+            LOG.info("git-committers: fetching submodule info for " + path + " from repository " + submodule_repo + " with path " + path_in_submodule)
+            authors = self.get_contributors_to_file(path_in_submodule, submodule_repo=submodule_repo)
         
         self.cache_page_authors[path] = {'last_commit_date': last_commit_date, 'authors': authors}
 
