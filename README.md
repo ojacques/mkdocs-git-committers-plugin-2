@@ -54,6 +54,11 @@ unless you access private repositories.
 
 For private GitHub repositories, you only need to allow read-only access to `Contents` and `Metadata` on the target repository. This could be done by setting `Read-only` access of `Permissions > Repository permissions > Contents`.
 
+## Counting Contributors
+
+* In GitHub repositories, the commit authors, [committers](https://stackoverflow.com/a/18754896), and [co-authors](https://docs.github.com/en/pull-requests/committing-changes-to-your-project/creating-and-editing-commits/creating-a-commit-with-multiple-authors) are counted as contributors. However, the plugin requires a GitHub token to fetch the list of co-authors. If co-authors exist but no token is provided, the plugin will show a warning and will only display the commit authors and committers.
+* In GitLab repositories, only the commit authors are counted as contributors.
+
 ## Config
 
 - `enabled` - Disables plugin if set to `False` for e.g. local builds (default: `True`)
@@ -79,7 +84,7 @@ For private GitHub repositories, you only need to allow read-only access to `Con
   gitlab.com (self-hosted).
 - `api_version` - For GitHub and GitLab self-hosted, the API version part that needs to be appended to the URL. 
   Defaults to v4 for GitLab, and nothing for GitHub Enterprise (you may need `v3`).
-- `docs_path` - the path to the documentation folder. Defaults to `docs`.
+- `docs_path` - the path to the documentation folder. Defaults to `docs/`.
 - `cache_dir` - The path which holds the authors cache file to speed up
   documentation builds. Defaults to `.cache/plugin/git-committers/`. The cache
   file is named `page-authors.json`.
