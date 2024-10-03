@@ -114,13 +114,13 @@ class GitCommittersPlugin(BasePlugin):
                             authors.append({'login': commit['author']['login'],
                                             'name': commit['author']['login'],
                                             'url': commit['author']['html_url'],
-                                            'avatar': commit['author']['avatar_url']
+                                            'avatar': commit['author']['avatar_url'] if user['avatar_url'] is not None else ''
                                             })
                         if commit['committer'] and commit['committer']['login'] and commit['committer']['login'] not in [author['login'] for author in authors]:
                             authors.append({'login': commit['committer']['login'],
                                             'name': commit['committer']['login'],
                                             'url': commit['committer']['html_url'],
-                                            'avatar': commit['committer']['avatar_url']
+                                            'avatar': commit['committer']['avatar_url'] if user['avatar_url'] is not None else ''
                                             })
                         if commit['commit'] and commit['commit']['message'] and '\nCo-authored-by:' in commit['commit']['message']:
                             github_coauthors_exist = True
@@ -134,7 +134,7 @@ class GitCommittersPlugin(BasePlugin):
                                     authors.append({'login': self.gitlabauthors_cache[commit['author_name']]['username'],
                                                     'name': commit['author_name'],
                                                     'url': self.gitlabauthors_cache[commit['author_name']]['web_url'],
-                                                    'avatar': self.gitlabauthors_cache[commit['author_name']]['avatar_url']
+                                                    'avatar': self.gitlabauthors_cache[commit['author_name']]['avatar_url'] if user['avatar_url'] is not None else ''
                                                     })
                                 else:
                                     # Fetch author from GitLab API
@@ -151,7 +151,7 @@ class GitCommittersPlugin(BasePlugin):
                                                     authors.append({'login': user['username'],
                                                                     'name': user['name'],
                                                                     'url': user['web_url'],
-                                                                    'avatar': user['avatar_url']
+                                                                    'avatar': user['avatar_url'] if user['avatar_url'] is not None else ''
                                                                     })
                                                     break
                                     else:
