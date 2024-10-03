@@ -126,7 +126,7 @@ Note: the plugin configuration in `mkdocs.yml` still uses the original `git-comm
 ## Limitations
 
 - Getting the contributors relies on what is available on GitHub or GitLab.
-- For now, Git submodule is not supported and will report no contributors.
+- For now, non-recursive Git submodule is supported for GitHub, while GitLab submodules and recursive submodules will report no contributors.
 - GitLab users may not be properly identified. See [issue #50](https://github.com/ojacques/mkdocs-git-committers-plugin-2/issues/50)
 
 ## Usage
