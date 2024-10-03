@@ -241,3 +241,8 @@ Thank you to the following contributors:
 - thor
 - n2N8Z
 - barreeeiroo
+- j3soon
+- vrenjith
+- rkorzeniec
+- karelbemelmans
+- andrew-rowson-lseg
