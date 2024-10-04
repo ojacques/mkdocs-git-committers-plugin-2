@@ -124,7 +124,7 @@ class GitCommittersPlugin(BasePlugin):
                             authors.append({'login': commit['committer']['login'],
                                             'name': commit['committer']['login'],
                                             'url': commit['committer']['html_url'],
-                                            'avatar': commit['committer']['avatar_url'] if commit['author']['avatar_url'] is not None else ''
+                                            'avatar': commit['committer']['avatar_url'] if commit['committer']['avatar_url'] is not None else ''
                                             })
                         if commit['commit'] and commit['commit']['message'] and '\nCo-authored-by:' in commit['commit']['message']:
                             github_coauthors_exist = True
