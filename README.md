@@ -38,7 +38,7 @@ For a repository hosted on GitLab:
 plugins:
   - git-committers:
       gitlab_repository: 12345678
-      token: !ENV ["GH_TOKEN"]
+      token: !ENV ["CI_JOB_TOKEN"]
 ```
 
 For a repository hosted on GitLab, you need to provide a token so that the
