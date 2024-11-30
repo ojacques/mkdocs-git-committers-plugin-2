@@ -31,6 +31,7 @@ class GitCommittersPlugin(BasePlugin):
         ('enabled', config_options.Type(bool, default=True)),
         ('cache_dir', config_options.Type(str, default='.cache/plugin/git-committers')),
         ("exclude", config_options.Type(list, default=[])),
+        ("exclude_committers", config_options.Type(list, default=[])),
         ('token', config_options.Type(str, default='')),
     )
 
@@ -41,6 +42,7 @@ class GitCommittersPlugin(BasePlugin):
         self.authors = dict()
         self.cache_page_authors = dict()
         self.exclude = list()
+        self.exclude_committers = list()
         self.cache_date = ''
         self.last_request_return_code = 0
         self.githuburl = "https://api.github.com"
@@ -88,6 +90,7 @@ class GitCommittersPlugin(BasePlugin):
         self.localrepo = Repo(".", search_parent_directories=True)
         self.branch = self.config['branch']
         self.excluded_pages = self.config['exclude']
+        self.exclude_committers = self.config['exclude_committers']
         return config
 
     # Get unique contributors for a given path
@@ -268,7 +271,13 @@ class GitCommittersPlugin(BasePlugin):
         else:
             LOG.info("git-committers: fetching submodule info for " + path + " from repository " + submodule_repo + " with path " + path_in_submodule)
             authors = self.get_contributors_to_file(path_in_submodule, submodule_repo=submodule_repo)
-        
+
+        for exclude_committer in set(self.exclude_committers):
+            for author in tuple(authors):
+                if author["login"] == exclude_committer:
+                    authors.remove(author)
+                    break
+
         if path not in self.cache_page_authors or self.cache_page_authors[path] != {'last_commit_date': last_commit_date, 'authors': authors}:
             self.should_save_cache = True
             self.cache_page_authors[path] = {'last_commit_date': last_commit_date, 'authors': authors}
