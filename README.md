@@ -104,6 +104,7 @@ For private GitHub repositories, you only need to allow read-only access to `Con
           - all_files_inside_folder/*
           - folder_and_subfolders/**
   ```
+- `exclude_committers` - Specify a list of usernames to exclude certain committers. Default is empty.
 
 ## History
 
