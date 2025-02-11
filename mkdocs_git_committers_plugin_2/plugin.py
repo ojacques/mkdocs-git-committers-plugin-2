@@ -80,7 +80,7 @@ class GitCommittersPlugin(BasePlugin):
             if self.config['gitlab_repository']:
                 self.auth_header = {'PRIVATE-TOKEN': self.config['token'] }
             else:
-                self.auth_header = {'Authorization': 'token ' + self.config['token'] }
+                self.auth_header = {'Authorization': 'Bearer ' + self.config['token'] }
         else:
             self.auth_header = None
             if self.config['gitlab_repository']:
