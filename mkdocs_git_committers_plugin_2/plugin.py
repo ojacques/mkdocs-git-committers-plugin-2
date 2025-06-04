@@ -125,7 +125,7 @@ class GitCommittersPlugin(BasePlugin):
                                             })
                         if commit['committer'] and commit['committer']['login'] and commit['committer']['login'] not in [author['login'] for author in authors]:
                             authors.append({'login': commit['committer']['login'],
-                                            'name': commit['committer']['login'],
+                                            'name': commit['committer']['name'],
                                             'url': commit['committer']['html_url'],
                                             'avatar': commit['committer']['avatar_url'] if commit['committer']['avatar_url'] is not None else ''
                                             })
