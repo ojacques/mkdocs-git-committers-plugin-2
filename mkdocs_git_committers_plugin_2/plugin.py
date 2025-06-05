@@ -180,6 +180,7 @@ class GitCommittersPlugin(BasePlugin):
         authors = self.get_contributors_to_file(path)
         
         self.cache_page_authors[path] = {'last_commit_date': last_commit_date, 'authors': authors}
+        self.save_cache()
 
         return authors, last_commit_date
 
@@ -207,6 +208,9 @@ class GitCommittersPlugin(BasePlugin):
         return context
 
     def on_post_build(self, config):
+        self.save_cache()
+
+    def save_cache(self):
         LOG.info("git-committers: saving page authors cache file")
         json_data = json.dumps({'cache_date': datetime.now().strftime("%Y-%m-%d"), 'page_authors': self.cache_page_authors})
         os.makedirs(self.config['cache_dir'], exist_ok=True)
