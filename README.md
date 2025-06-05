@@ -38,7 +38,7 @@ For a repository hosted on GitLab:
 plugins:
   - git-committers:
       gitlab_repository: 12345678
-      token: !ENV ["GH_TOKEN"]
+      token: !ENV ["CI_JOB_TOKEN"]
 ```
 
 For a repository hosted on GitLab, you need to provide a token so that the
@@ -52,6 +52,13 @@ uncheck everything when creating the GitHub Token at
 [github.com/settings/personal-access-tokens/new](https://github.com/settings/personal-access-tokens/new),
 unless you access private repositories.
 
+For private GitHub repositories, you only need to allow read-only access to `Contents` and `Metadata` on the target repository. This could be done by setting `Read-only` access of `Permissions > Repository permissions > Contents`.
+
+## Counting Contributors
+
+* In GitHub repositories, the commit authors, [committers](https://stackoverflow.com/a/18754896), and [co-authors](https://docs.github.com/en/pull-requests/committing-changes-to-your-project/creating-and-editing-commits/creating-a-commit-with-multiple-authors) are counted as contributors. However, the plugin requires a GitHub token to fetch the list of co-authors. If co-authors exist but no token is provided, the plugin will show a warning and will only display the commit authors and committers.
+* In GitLab repositories, only the commit authors are counted as contributors.
+
 ## Config
 
 - `enabled` - Disables plugin if set to `False` for e.g. local builds (default: `True`)
@@ -60,18 +67,24 @@ unless you access private repositories.
 - `gitlab_repository` - For GitLab, the project ID, e.g. '12345678'
 - `branch` - The name of the branch to get contributors from. Example: 'master'
   (default)
-- `token` - A GitHub or GitLab personal access token for REST API calls. The
-  token does not need any scope: uncheck everything when creating the GitHub
-  Token at
-  [github.com/settings/personal-access-tokens/new](https://github.com/settings/personal-access-tokens/new),
-  unless you access private repositories. For GitLab, create a token at
-  [gitlab.com/-/profile/personal_access_tokens](https://gitlab.com/-/profile/personal_access_tokens).
+- `token` - A GitHub or GitLab personal access token for REST API calls. 
+  - For GitHub, token does not need any scope: uncheck everything when creating
+    the GitHub Token at
+    [github.com/settings/personal-access-tokens/new](https://github.com/settings/personal-access-tokens/new),
+    unless you access private repositories.
+  - For GitLab, a
+    [project access token](https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html)
+    scoped to `read_api` is expected to work. That way, the token is limited to
+    the project and has access to read the repository. You could use a personal
+    access token at
+    [gitlab.com/-/profile/personal_access_tokens](https://gitlab.com/-/profile/personal_access_tokens),
+    but it will grant access to more repositories than you want.
 - `enterprise_hostname` - For GitHub enterprise: the GitHub enterprise hostname.
 - `gitlab_hostname` - For GitLab: the GitLab hostname if different from 
   gitlab.com (self-hosted).
 - `api_version` - For GitHub and GitLab self-hosted, the API version part that needs to be appended to the URL. 
   Defaults to v4 for GitLab, and nothing for GitHub Enterprise (you may need `v3`).
-- `docs_path` - the path to the documentation folder. Defaults to `docs`.
+- `docs_path` - the path to the documentation folder. Defaults to `docs/`.
 - `cache_dir` - The path which holds the authors cache file to speed up
   documentation builds. Defaults to `.cache/plugin/git-committers/`. The cache
   file is named `page-authors.json`.
@@ -91,6 +104,7 @@ unless you access private repositories.
           - all_files_inside_folder/*
           - folder_and_subfolders/**
   ```
+- `exclude_committers` - Specify a list of usernames to exclude certain committers. Default is empty.
 
 ## History
 
@@ -113,7 +127,8 @@ Note: the plugin configuration in `mkdocs.yml` still uses the original `git-comm
 ## Limitations
 
 - Getting the contributors relies on what is available on GitHub or GitLab.
-- For now, Git submodule is not supported and will report no contributors.
+- For now, non-recursive Git submodule is supported for GitHub, while GitLab submodules and recursive submodules will report no contributors.
+- GitLab users may not be properly identified. See [issue #50](https://github.com/ojacques/mkdocs-git-committers-plugin-2/issues/50)
 
 ## Usage
 
@@ -227,3 +242,8 @@ Thank you to the following contributors:
 - thor
 - n2N8Z
 - barreeeiroo
+- j3soon
+- vrenjith
+- rkorzeniec
+- karelbemelmans
+- andrew-rowson-lseg
