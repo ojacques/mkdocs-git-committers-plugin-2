@@ -281,6 +281,7 @@ class GitCommittersPlugin(BasePlugin):
         if path not in self.cache_page_authors or self.cache_page_authors[path] != {'last_commit_date': last_commit_date, 'authors': authors}:
             self.should_save_cache = True
             self.cache_page_authors[path] = {'last_commit_date': last_commit_date, 'authors': authors}
+            self.save_cache()
 
         return authors, last_commit_date
 
@@ -308,6 +309,9 @@ class GitCommittersPlugin(BasePlugin):
         return context
 
     def on_post_build(self, config):
+        self.save_cache()
+
+    def save_cache(self):
         if not self.should_save_cache:
             return
         LOG.info("git-committers: saving page authors cache file")
