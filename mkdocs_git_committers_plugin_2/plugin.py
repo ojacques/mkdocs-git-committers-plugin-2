@@ -314,7 +314,7 @@ class GitCommittersPlugin(BasePlugin):
     def save_cache(self):
         if not self.should_save_cache:
             return
-        LOG.info("git-committers: saving page authors cache file")
+        # LOG.info("git-committers: saving page authors cache file")
         json_data = json.dumps({'cache_date': datetime.now().strftime("%Y-%m-%d"), 'page_authors': self.cache_page_authors})
         os.makedirs(self.config['cache_dir'], exist_ok=True)
         f = open(self.config['cache_dir'] + "/page-authors.json", "w")
