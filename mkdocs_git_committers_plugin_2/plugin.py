@@ -51,6 +51,7 @@ class GitCommittersPlugin(BasePlugin):
         self.should_save_cache = False
 
     def on_config(self, config):
+        LOG.info("git-committers plugin - custom build")
         self.enabled = self.config['enabled']
         if not self.enabled:
             LOG.info("git-committers plugin DISABLED")
