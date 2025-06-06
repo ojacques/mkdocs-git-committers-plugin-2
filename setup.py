@@ -9,7 +9,7 @@ long_description = (here / "README.md").read_text(encoding="utf-8")
 
 setup(
     name="mkdocs-git-committers-plugin-2",
-    version="2.5.0",
+    version="2.5.2",
     description="An MkDocs plugin to create a list of contributors on the page. The git-committers plugin will seed the template context with a list of GitHub or GitLab committers and other useful GIT info such as last modified date",
     long_description=long_description,
     long_description_content_type="text/markdown",
