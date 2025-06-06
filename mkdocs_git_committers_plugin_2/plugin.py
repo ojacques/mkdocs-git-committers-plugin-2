@@ -51,6 +51,7 @@ class GitCommittersPlugin(BasePlugin):
         self.should_save_cache = False
 
     def on_config(self, config):
+        LOG.info("git-committers plugin - custom build")
         self.enabled = self.config['enabled']
         if not self.enabled:
             LOG.info("git-committers plugin DISABLED")
@@ -119,13 +120,13 @@ class GitCommittersPlugin(BasePlugin):
                         # GitHub
                         if commit['author'] and commit['author']['login'] and commit['author']['login'] not in [author['login'] for author in authors]:
                             authors.append({'login': commit['author']['login'],
-                                            'name': commit['author']['login'],
+                                            'name': commit['author'].get('name') or commit['author']['login'],
                                             'url': commit['author']['html_url'],
                                             'avatar': commit['author']['avatar_url'] if commit['author']['avatar_url'] is not None else ''
                                             })
                         if commit['committer'] and commit['committer']['login'] and commit['committer']['login'] not in [author['login'] for author in authors]:
                             authors.append({'login': commit['committer']['login'],
-                                            'name': commit['committer']['login'],
+                                            'name': commit['author'].get('name') or commit['author']['login'],
                                             'url': commit['committer']['html_url'],
                                             'avatar': commit['committer']['avatar_url'] if commit['committer']['avatar_url'] is not None else ''
                                             })
@@ -263,6 +264,7 @@ class GitCommittersPlugin(BasePlugin):
             if self.cache_date and time.strptime(last_commit_date, "%Y-%m-%d") < time.strptime(self.cache_date, "%Y-%m-%d"):
                 # If page_autors in cache is not empty, return it
                 if self.cache_page_authors[path]['authors']:
+                    LOG.info(f"git-committers: using cached authors for {path}")
                     return self.cache_page_authors[path]['authors'], self.cache_page_authors[path]['last_commit_date']
 
         authors=[]
@@ -281,6 +283,7 @@ class GitCommittersPlugin(BasePlugin):
         if path not in self.cache_page_authors or self.cache_page_authors[path] != {'last_commit_date': last_commit_date, 'authors': authors}:
             self.should_save_cache = True
             self.cache_page_authors[path] = {'last_commit_date': last_commit_date, 'authors': authors}
+            self.save_cache()
 
         return authors, last_commit_date
 
@@ -308,6 +311,9 @@ class GitCommittersPlugin(BasePlugin):
         return context
 
     def on_post_build(self, config):
+        self.save_cache()
+
+    def save_cache(self):
         if not self.should_save_cache:
             return
         LOG.info("git-committers: saving page authors cache file")
@@ -319,7 +325,7 @@ class GitCommittersPlugin(BasePlugin):
 
     def on_pre_build(self, config):
         if os.path.exists(self.config['cache_dir'] + "/page-authors.json"):
-            LOG.info("git-committers: found page authors cache file - loading it")
+            LOG.info(f"git-committers: found page authors cache file at {self.config['cache_dir'] + '/page-authors.json'} - loading it")
             f = open(self.config['cache_dir'] + "/page-authors.json", "r")
             cache = json.loads(f.read())
             self.cache_date = cache['cache_date']
