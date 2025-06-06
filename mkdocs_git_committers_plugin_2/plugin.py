@@ -265,7 +265,7 @@ class GitCommittersPlugin(BasePlugin):
                 # If page_autors in cache is not empty, return it
                 if self.cache_page_authors[path]['authors']:
                     LOG.info(f"git-committers: using cached authors for {path}")
-                    self.cache_page_authors[path]['authors'], self.cache_page_authors[path]['last_commit_date']
+                    return self.cache_page_authors[path]['authors'], self.cache_page_authors[path]['last_commit_date']
 
         authors=[]
         if not submodule_repo:
