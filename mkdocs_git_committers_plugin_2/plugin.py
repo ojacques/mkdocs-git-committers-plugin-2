@@ -1,5 +1,6 @@
 import os
 import logging
+import pathlib
 from pprint import pprint
 from timeit import default_timer as timer
 from datetime import datetime, timedelta
@@ -91,6 +92,8 @@ class GitCommittersPlugin(BasePlugin):
         self.branch = self.config['branch']
         self.excluded_pages = self.config['exclude']
         self.exclude_committers = self.config['exclude_committers']
+        self.config['cache_dir'] = str(pathlib.Path(self.config['cache_dir']).expanduser())
+
         return config
 
     # Get unique contributors for a given path
