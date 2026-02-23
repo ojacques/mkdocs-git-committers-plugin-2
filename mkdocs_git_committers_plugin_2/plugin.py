@@ -310,7 +310,7 @@ class GitCommittersPlugin(BasePlugin):
     def on_post_build(self, config):
         if not self.should_save_cache:
             return
-        LOG.info("git-committers: saving page authors cache file")
+        LOG.info(f"git-committers: saving page authors cache file to {self.config['cache_dir']}/page-authors.json")
         json_data = json.dumps({'cache_date': datetime.now().strftime("%Y-%m-%d"), 'page_authors': self.cache_page_authors})
         os.makedirs(self.config['cache_dir'], exist_ok=True)
         f = open(self.config['cache_dir'] + "/page-authors.json", "w")
@@ -319,7 +319,7 @@ class GitCommittersPlugin(BasePlugin):
 
     def on_pre_build(self, config):
         if os.path.exists(self.config['cache_dir'] + "/page-authors.json"):
-            LOG.info("git-committers: found page authors cache file - loading it")
+            LOG.info(f"git-committers: found page authors cache file {self.config['cache_dir']}/page-authors.json - loading it")
             f = open(self.config['cache_dir'] + "/page-authors.json", "r")
             cache = json.loads(f.read())
             self.cache_date = cache['cache_date']
