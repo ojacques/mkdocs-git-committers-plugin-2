@@ -107,7 +107,7 @@ class GitCommittersPlugin(BasePlugin):
                 # REST endpoint is in the form https://api.github.com/repos/[repository]/commits?path=[uri-encoded-path]&sha=[branch]&per_page=100
                 url = self.githuburl + "/repos/" + repository + "/commits?path=" +  requests.utils.quote(path) + "&sha=" + self.branch + "&per_page=100"
             authors = []
-            LOG.info("git-committers: fetching contributors for " + path)
+            LOG.debug("git-committers: fetching contributors for " + path)
             r = requests.get(url=url, headers=self.auth_header)
             self.last_request_return_code = r.status_code
             if r.status_code == 200:
@@ -169,7 +169,7 @@ class GitCommittersPlugin(BasePlugin):
                     if self.auth_header is None:
                         LOG.warning("git-committers: Co-authors exist in commit messages but will not be added, since no GitHub token is provided. Set it under 'token' mkdocs.yml config or MKDOCS_GIT_COMMITTERS_APIKEY environment variable.")
                     else:
-                        LOG.info("git-committers: fetching contributors for " + path + " using GraphQL API")
+                        LOG.debug("git-committers: fetching contributors for " + path + " using GraphQL API")
                         # Query GraphQL API, and get a list of unique authors
                         url = self.githuburl + "/graphql"
                         query = {
